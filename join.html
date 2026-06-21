@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Join server GTA SA-MP Verscity Roleplay NewEra.">
+    <title>Join | Verscity Roleplay NewEra</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-server-host="" data-server-port="7777">
+    <svg class="svg-sprite" aria-hidden="true">
+      <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"></path></symbol>
+      <symbol id="icon-discord" viewBox="0 0 24 24"><path d="M8 17c-2.6-.8-4-2.2-4-2.2.3-4.6 1.9-8 1.9-8C8.4 5.1 10.8 5 12 5s3.6.1 6.1 1.8c0 0 1.6 3.4 1.9 8 0 0-1.4 1.4-4 2.2l-.9-1.2c1.8-.5 2.5-1.2 2.5-1.2-1 .7-2 1-2.9 1.2a10 10 0 0 1-5.4 0c-.9-.2-1.9-.5-2.9-1.2 0 0 .7.7 2.5 1.2L8 17z"></path><circle cx="9.5" cy="12" r="1.2"></circle><circle cx="14.5" cy="12" r="1.2"></circle></symbol>
+    </svg>
+
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Verscity Roleplay Home">
+        <span class="brand-mark">VR</span>
+        <span><strong>Verscity</strong><small>Roleplay NewEra</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="fitur.html">Fitur</a>
+        <a href="roleplay.html">Roleplay</a>
+        <a href="rules.html">Rules</a>
+        <a href="staff.html">Staff</a>
+        <a href="donation.html">Donation</a>
+        <a href="join.html">Join</a>
+      </nav>
+      <button class="icon-button menu-toggle" type="button" aria-label="Buka menu" title="Menu"><span></span><span></span></button>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero">
+        <div class="page-hero-inner">
+          <p class="eyebrow">Join server</p>
+          <h1>Masuk ke Verscity NewEra</h1>
+          <p class="page-lead">Copy IP, buka SA-MP, masuk Discord, lalu mulai cerita kamu di San Andreas.</p>
+        </div>
+      </section>
+
+      <section class="content-band">
+        <div class="content-inner join-panel">
+          <div class="join-card">
+            <p class="eyebrow">Server address</p>
+            <h2>Verscity Roleplay | NewEra</h2>
+            <div class="address-box">
+              <code data-ip-label>127.0.0.1:7777</code>
+              <button class="button button-primary" type="button" data-copy-ip title="Salin IP server">
+                <svg><use href="#icon-copy"></use></svg>
+                Salin IP
+              </button>
+            </div>
+            <div class="join-actions">
+              <a class="button button-secondary" href="samp://127.0.0.1:7777">
+                <svg><use href="#icon-play"></use></svg>
+                Connect SA-MP
+              </a>
+              <a class="button button-ghost" href="https://discord.gg/tMCs4ftTKQ" target="_blank" rel="noreferrer">
+                <svg><use href="#icon-discord"></use></svg>
+                Discord
+              </a>
+            </div>
+          </div>
+
+          <aside class="server-panel" aria-label="Info server">
+            <div class="panel-header"><span class="status-dot"></span><span>SA-MP Query Aktif</span></div>
+            <dl class="server-stats">
+              <div><dt>Port</dt><dd>7777</dd></div>
+              <div><dt>Slot</dt><dd data-server-maxplayers>250</dd></div>
+              <div><dt>Total Player</dt><dd data-server-players>0/250</dd></div>
+              <div><dt>Map</dt><dd>San Andreas</dd></div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="content-band light">
+        <div class="content-inner">
+          <div class="section-head">
+            <p class="eyebrow">Langkah masuk</p>
+            <h2>Cepat mulai dari sini</h2>
+          </div>
+          <div class="detail-grid">
+            <article class="step-card"><span>1</span><h3>Join Discord</h3><p>Masuk Discord untuk informasi server, UCP, pengumuman, dan bantuan admin.</p></article>
+            <article class="step-card"><span>2</span><h3>Copy IP</h3><p>Tambahkan alamat server ke SA-MP favorites supaya mudah masuk lagi.</p></article>
+            <article class="step-card"><span>3</span><h3>Mulai Roleplay</h3><p>Buat karakter, baca rules, lalu mulai interaksi dengan warga Verscity.</p></article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
+    <div class="toast" role="status" aria-live="polite" data-toast>IP server disalin.</div>
+    <script src="script.js"></script>
+  </body>
+</html>

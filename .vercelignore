@@ -1,0 +1,6 @@
+.env
+data/
+screenshots/
+.agents/
+.codex/
+start-website.bat

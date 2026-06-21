@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Admin panel Verscity Roleplay NewEra untuk mengelola staff dan donation.">
+    <title>Admin Panel | Verscity Roleplay NewEra</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-server-host="" data-server-port="7777">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Verscity Roleplay Home">
+        <span class="brand-mark">VR</span>
+        <span><strong>Verscity</strong><small>Roleplay NewEra</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="fitur.html">Fitur</a>
+        <a href="roleplay.html">Roleplay</a>
+        <a href="rules.html">Rules</a>
+        <a href="staff.html">Staff</a>
+        <a href="donation.html">Donation</a>
+        <a href="join.html">Join</a>
+      </nav>
+      <button class="icon-button menu-toggle" type="button" aria-label="Buka menu" title="Menu"><span></span><span></span></button>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero">
+        <div class="page-hero-inner">
+          <p class="eyebrow">Admin panel</p>
+          <h1>Kelola staff dan donation</h1>
+          <p class="page-lead">Login admin untuk mengubah profil staff serta isi paket donation, kendaraan, foto, harga, dan benefit yang tampil di website.</p>
+        </div>
+      </section>
+
+      <section class="content-band">
+        <div class="content-inner admin-layout">
+          <form class="admin-card" data-login-form>
+            <p class="eyebrow">Login admin</p>
+            <h2>Masuk panel</h2>
+            <label>
+              Username
+              <input type="text" name="username" autocomplete="username" required>
+            </label>
+            <label>
+              Password
+              <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button class="button button-primary" type="submit">Login</button>
+            <p class="admin-hint">Default: admin / verscity123</p>
+          </form>
+
+          <form class="admin-card hidden" data-staff-form>
+            <div class="admin-head">
+              <div>
+                <p class="eyebrow">Edit staff</p>
+                <h2>Profil staff</h2>
+              </div>
+              <button class="button button-ghost" type="button" data-admin-logout>Logout</button>
+            </div>
+
+            <label>
+              Pilih staff
+              <select name="staffId" data-staff-select></select>
+            </label>
+
+            <div class="admin-preview">
+              <div class="staff-avatar admin-avatar" data-admin-avatar>VC</div>
+              <div>
+                <h3 data-admin-preview-name>Verscity Owner</h3>
+                <p data-admin-preview-rank>Owner</p>
+              </div>
+            </div>
+
+            <label>
+              Foto profil
+              <input type="file" name="photo" accept="image/*">
+            </label>
+            <button class="button button-ghost" type="button" data-remove-photo>Hapus Foto</button>
+
+            <label>
+              Nama
+              <input type="text" name="name" required>
+            </label>
+            <label>
+              Rank
+              <input type="text" name="rank" required>
+            </label>
+            <label>
+              Status
+              <select name="status" required>
+                <option value="online">Online</option>
+                <option value="standby">Standby</option>
+                <option value="offline">Offline</option>
+              </select>
+            </label>
+            <label>
+              Deskripsi
+              <textarea name="description" rows="4" required></textarea>
+            </label>
+
+            <div class="admin-actions">
+              <button class="button button-primary" type="submit">Simpan Perubahan</button>
+              <button class="button button-secondary" type="button" data-reset-staff>Reset Staff</button>
+              <a class="button button-ghost" href="staff.html">Lihat Staff</a>
+            </div>
+          </form>
+
+          <form class="admin-card hidden" data-donation-form>
+            <div class="admin-head">
+              <div>
+                <p class="eyebrow">Edit donation</p>
+                <h2>Paket donation</h2>
+              </div>
+              <a class="button button-ghost" href="donation.html">Lihat Donation</a>
+            </div>
+
+            <label>
+              Pilih paket
+              <select name="packageId" data-donation-select></select>
+            </label>
+
+            <div class="admin-preview donation-admin-preview">
+              <div class="vehicle-photo admin-donation-photo" data-donation-preview-photo></div>
+              <div>
+                <h3 data-donation-preview-name>VIP Silver</h3>
+                <p data-donation-preview-meta>VIP Basic - Rp35.000</p>
+              </div>
+            </div>
+
+            <label>
+              Kategori halaman
+              <select name="group" required>
+                <option value="vip">VIP</option>
+                <option value="apartments">Apartments</option>
+                <option value="house">House</option>
+                <option value="bisnis">Bisnis</option>
+                <option value="lainnya">Lainnya</option>
+                <option value="vehicles-motor">Vehicles - Motor</option>
+                <option value="vehicles-mobil">Vehicles - Mobil</option>
+                <option value="vehicles-kapal">Vehicles - Kapal</option>
+                <option value="vehicles-pesawat">Vehicles - Pesawat/Helikopter</option>
+              </select>
+            </label>
+            <label>
+              Label kecil
+              <input type="text" name="tier" required>
+            </label>
+            <label>
+              Nama paket/kendaraan
+              <input type="text" name="name" required>
+            </label>
+            <label>
+              Harga
+              <input type="text" name="price" required>
+            </label>
+            <label>
+              Benefit
+              <textarea name="benefits" rows="5" required></textarea>
+            </label>
+            <label class="admin-check">
+              <input type="checkbox" name="featured">
+              Jadikan paket highlight
+            </label>
+            <label>
+              Foto paket/kendaraan
+              <input type="file" name="photo" accept="image/*">
+            </label>
+            <button class="button button-ghost" type="button" data-remove-donation-photo>Hapus Foto Custom</button>
+
+            <div class="admin-actions">
+              <button class="button button-primary" type="submit">Simpan Donation</button>
+              <button class="button button-secondary" type="button" data-add-donation>Tambah Paket</button>
+              <button class="button button-ghost" type="button" data-delete-donation>Hapus Paket</button>
+              <button class="button button-secondary" type="button" data-reset-donation>Reset Donation</button>
+            </div>
+          </form>
+
+          <form class="admin-card hidden" data-vehicle-category-form>
+            <div class="admin-head">
+              <div>
+                <p class="eyebrow">Edit foto vehicles</p>
+                <h2>Foto kategori</h2>
+              </div>
+              <a class="button button-ghost" href="donation-vehicles.html">Lihat Vehicles</a>
+            </div>
+
+            <label>
+              Pilih kategori
+              <select name="categoryId" data-vehicle-category-select></select>
+            </label>
+
+            <div class="admin-preview donation-admin-preview">
+              <div class="vehicle-preview admin-vehicle-category-photo" data-vehicle-category-preview></div>
+              <div>
+                <h3 data-vehicle-category-preview-name>Motor</h3>
+                <p>Ukuran aman: 1200 x 675 px</p>
+              </div>
+            </div>
+
+            <label>
+              Foto kategori
+              <input type="file" name="photo" accept="image/*">
+            </label>
+            <button class="button button-ghost" type="button" data-remove-vehicle-category-photo>Hapus Foto Custom</button>
+
+            <div class="admin-actions">
+              <button class="button button-primary" type="submit">Simpan Foto</button>
+              <button class="button button-secondary" type="button" data-reset-vehicle-category-photo>Reset Foto Vehicles</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
+    <div class="toast" role="status" aria-live="polite" data-toast>Data staff tersimpan.</div>
+    <script src="script.js"></script>
+  </body>
+</html>
