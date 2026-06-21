@@ -1125,6 +1125,153 @@ img.staff-avatar {
   margin-top: auto;
 }
 
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.checkout-summary,
+.checkout-form,
+.admin-order-panel,
+.order-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+}
+
+.checkout-summary,
+.checkout-form,
+.admin-order-panel {
+  display: grid;
+  gap: 16px;
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.checkout-summary ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.checkout-form label {
+  display: grid;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+}
+
+.checkout-form input,
+.checkout-form textarea,
+.order-card select {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  outline: none;
+}
+
+.order-card select option {
+  color: #101216;
+}
+
+.checkout-payment-note,
+.checkout-result,
+.muted-text {
+  color: var(--muted);
+}
+
+.checkout-payment-note {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.checkout-result {
+  min-height: 24px;
+  margin: 0;
+}
+
+.admin-panel-login {
+  max-width: 520px;
+}
+
+.admin-order-panel.hidden,
+.admin-panel-login.hidden,
+.checkout-form.hidden {
+  display: none;
+}
+
+.admin-order-head,
+.order-card-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-list {
+  display: grid;
+  gap: 14px;
+}
+
+.order-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.order-card h3,
+.order-card p {
+  margin: 0;
+}
+
+.order-card-head select {
+  max-width: 180px;
+}
+
+.order-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.order-meta div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.order-meta dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.order-meta dd {
+  margin: 0;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.order-note {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 .vehicle-category-grid,
 .vehicle-list-grid {
   display: grid;
@@ -1384,6 +1531,7 @@ img.staff-avatar {
   .detail-grid,
   .donation-grid,
   .donation-info,
+  .checkout-layout,
   .vehicle-category-grid,
   .vehicle-list-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1476,6 +1624,7 @@ img.staff-avatar {
   .staff-note,
   .donation-grid,
   .donation-info,
+  .checkout-layout,
   .vehicle-category-grid,
   .vehicle-list-grid {
     grid-template-columns: 1fr;
@@ -1492,7 +1641,9 @@ img.staff-avatar {
 
   .staff-note-actions,
   .admin-head,
-  .admin-actions {
+  .admin-actions,
+  .admin-order-head,
+  .order-card-head {
     align-items: stretch;
     justify-content: flex-start;
   }
@@ -1502,8 +1653,14 @@ img.staff-avatar {
   }
 
   .admin-head,
-  .admin-actions {
+  .admin-actions,
+  .admin-order-head,
+  .order-card-head {
     display: grid;
+  }
+
+  .order-meta {
+    grid-template-columns: 1fr;
   }
 
   .quick-grid {

@@ -2,8 +2,8 @@
   const body = document.body;
   const configuredHost = (body.dataset.serverHost || "").trim();
   const configuredPort = (body.dataset.serverPort || "7777").trim() || "7777";
-  const host = configuredHost || window.location.hostname || "127.0.0.1";
-  const serverAddress = `${host}:${configuredPort}`;
+  const host = configuredHost || "127.0.0.1";
+  let serverAddress = `${host}:${configuredPort}`;
   const toast = document.querySelector("[data-toast]");
   const menuToggle = document.querySelector(".menu-toggle");
   const navLinks = document.querySelectorAll(".nav-links a");
@@ -15,7 +15,8 @@
   const siteDataState = {
     staff: null,
     donationPackages: null,
-    vehicleCategoryPhotos: null
+    vehicleCategoryPhotos: null,
+    orders: null
   };
 
   const defaultStaff = [
@@ -112,9 +113,21 @@
     { id: "pesawat", label: "Pesawat/Helikopter", photo: "", photoClass: "photo-aircraft" }
   ];
 
-  document.querySelectorAll("[data-ip-label]").forEach((label) => {
-    label.textContent = serverAddress;
-  });
+  function setServerAddress(nextHost, nextPort) {
+    const cleanHost = String(nextHost || host || "127.0.0.1").trim();
+    const cleanPort = String(nextPort || configuredPort || "7777").trim();
+    serverAddress = `${cleanHost}:${cleanPort}`;
+
+    document.querySelectorAll("[data-ip-label]").forEach((label) => {
+      label.textContent = serverAddress;
+    });
+
+    document.querySelectorAll('a[href^="samp://"]').forEach((link) => {
+      link.href = `samp://${serverAddress}`;
+    });
+  }
+
+  setServerAddress(host, configuredPort);
 
   async function refreshServerStatus() {
     if (!window.location.protocol.startsWith("http")) return;
@@ -125,6 +138,7 @@
       const status = await response.json();
       const maxplayers = Number(status.maxplayers || 250);
       const players = Number(status.players || 0);
+      setServerAddress(status.host || host, status.port || configuredPort);
 
       document.querySelectorAll(".server-panel").forEach((panel) => {
         const label = panel.querySelector(".panel-header span:last-child");
@@ -287,6 +301,9 @@
       if (Array.isArray(data.vehicleCategoryPhotos) && data.vehicleCategoryPhotos.length) {
         siteDataState.vehicleCategoryPhotos = data.vehicleCategoryPhotos;
       }
+      if (Array.isArray(data.orders)) {
+        siteDataState.orders = data.orders;
+      }
     } catch (error) {
       showToast("Data global belum tersambung, memakai data lokal.", 3200);
     }
@@ -299,7 +316,8 @@
       data: {
         staff: getStaffList(),
         donationPackages: getDonationPackages(),
-        vehicleCategoryPhotos: getVehicleCategoryPhotos()
+        vehicleCategoryPhotos: getVehicleCategoryPhotos(),
+        orders: Array.isArray(siteDataState.orders) ? siteDataState.orders : []
       }
     };
 
@@ -363,7 +381,7 @@
         <h3>${escapeHtml(pkg.name)}</h3>
         <p class="donation-price">${escapeHtml(pkg.price)}</p>
         <ul>${renderBenefitList(pkg.benefits)}</ul>
-        <a class="${buttonClass}" href="https://discord.gg/tMCs4ftTKQ" target="_blank" rel="noreferrer">Konfirmasi</a>
+        <a class="${buttonClass}" href="checkout.html?package=${encodeURIComponent(pkg.id)}">Checkout</a>
       </article>
     `;
   }
@@ -424,6 +442,235 @@
         `;
       })
       .join("");
+  }
+
+  function findCheckoutPackage() {
+    const params = new URLSearchParams(window.location.search);
+    const packageId = params.get("package") || "";
+    return getDonationPackages().find((pkg) => pkg.id === packageId) || null;
+  }
+
+  function initCheckoutPage() {
+    const checkoutForm = document.querySelector("[data-checkout-form]");
+    const checkoutSummary = document.querySelector("[data-checkout-summary]");
+    const checkoutResult = document.querySelector("[data-checkout-result]");
+    if (!checkoutForm || !checkoutSummary) return;
+
+    const pkg = findCheckoutPackage();
+    if (!pkg) {
+      checkoutForm.classList.add("hidden");
+      checkoutSummary.innerHTML = `
+        <p class="eyebrow">Paket tidak ditemukan</p>
+        <h2>Pilih ulang paket donation</h2>
+        <p class="muted-text">Paket ini tidak tersedia atau link checkout tidak lengkap.</p>
+        <a class="button button-primary" href="donation.html">Kembali ke Donation</a>
+      `;
+      return;
+    }
+
+    checkoutForm.elements.packageId.value = pkg.id;
+    checkoutSummary.innerHTML = `
+      <p class="eyebrow">${escapeHtml(pkg.tier)}</p>
+      <h2>${escapeHtml(pkg.name)}</h2>
+      <p class="donation-price">${escapeHtml(pkg.price)}</p>
+      <ul>${renderBenefitList(pkg.benefits)}</ul>
+    `;
+
+    checkoutForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submitButton = checkoutForm.querySelector("button[type='submit']");
+      const payload = {
+        packageId: checkoutForm.elements.packageId.value,
+        packageName: pkg.name,
+        packageGroup: pkg.group,
+        tier: pkg.tier,
+        price: pkg.price,
+        buyerName: checkoutForm.elements.buyerName.value,
+        whatsapp: checkoutForm.elements.whatsapp.value,
+        discord: checkoutForm.elements.discord.value,
+        characterName: checkoutForm.elements.characterName.value,
+        note: checkoutForm.elements.note.value
+      };
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Membuat order...";
+      if (checkoutResult) checkoutResult.textContent = "";
+
+      try {
+        const response = await fetch("/api/checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Checkout gagal.");
+        }
+
+        checkoutForm.reset();
+        checkoutForm.elements.packageId.value = pkg.id;
+        if (checkoutResult) {
+          checkoutResult.innerHTML = `Order <strong>${escapeHtml(result.order.id)}</strong> berhasil dibuat. Admin akan memproses order kamu.`;
+        }
+        showToast("Order checkout berhasil dibuat.");
+      } catch (error) {
+        if (checkoutResult) checkoutResult.textContent = error.message;
+        showToast(error.message, 3600);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Buat Order";
+      }
+    });
+  }
+
+  function orderStatusLabel(status) {
+    return {
+      pending: "Pending",
+      paid: "Paid",
+      processing: "Processing",
+      done: "Done",
+      cancelled: "Cancelled"
+    }[status] || status;
+  }
+
+  function renderOrders(orders) {
+    const orderList = document.querySelector("[data-order-list]");
+    if (!orderList) return;
+
+    if (!orders.length) {
+      orderList.innerHTML = `<p class="muted-text">Belum ada order checkout.</p>`;
+      return;
+    }
+
+    orderList.innerHTML = orders.map((order) => `
+      <article class="order-card" data-order-id="${escapeHtml(order.id)}">
+        <div class="order-card-head">
+          <div>
+            <span class="donation-tier">${escapeHtml(orderStatusLabel(order.status))}</span>
+            <h3>${escapeHtml(order.packageName)}</h3>
+            <p>${escapeHtml(order.id)} - ${escapeHtml(order.price)}</p>
+          </div>
+          <select data-order-status>
+            ${["pending", "paid", "processing", "done", "cancelled"].map((status) => (
+              `<option value="${status}"${order.status === status ? " selected" : ""}>${orderStatusLabel(status)}</option>`
+            )).join("")}
+          </select>
+        </div>
+        <dl class="order-meta">
+          <div><dt>Pembeli</dt><dd>${escapeHtml(order.buyerName)}</dd></div>
+          <div><dt>WhatsApp</dt><dd>${escapeHtml(order.whatsapp)}</dd></div>
+          <div><dt>Discord</dt><dd>${escapeHtml(order.discord || "-")}</dd></div>
+          <div><dt>Karakter</dt><dd>${escapeHtml(order.characterName)}</dd></div>
+          <div><dt>Dibuat</dt><dd>${escapeHtml(new Date(order.createdAt).toLocaleString("id-ID"))}</dd></div>
+        </dl>
+        ${order.note ? `<p class="order-note">${escapeHtml(order.note)}</p>` : ""}
+      </article>
+    `).join("");
+  }
+
+  async function fetchOrders() {
+    const response = await fetch("/api/orders", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "Gagal mengambil order.");
+    }
+    return result.orders || [];
+  }
+
+  async function initAdminPanelPage() {
+    const loginForm = document.querySelector("[data-admin-panel-login]");
+    const panel = document.querySelector("[data-admin-order-panel]");
+    const refreshButton = document.querySelector("[data-refresh-orders]");
+    const logoutButton = document.querySelector("[data-admin-panel-logout]");
+    const orderList = document.querySelector("[data-order-list]");
+    if (!loginForm || !panel || !orderList) return;
+
+    async function loadOrders() {
+      try {
+        renderOrders(await fetchOrders());
+      } catch (error) {
+        orderList.innerHTML = `<p class="muted-text">${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    function setPanelState() {
+      const loggedIn = sessionStorage.getItem(adminSessionKey) === "true";
+      loginForm.classList.toggle("hidden", loggedIn);
+      panel.classList.toggle("hidden", !loggedIn);
+      if (loggedIn) loadOrders();
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        const response = await fetch("/api/admin-login", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username: loginForm.elements.username.value.trim(),
+            password: loginForm.elements.password.value
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Login gagal.");
+        }
+
+        sessionStorage.setItem(adminSessionKey, "true");
+        loginForm.reset();
+        setPanelState();
+        showToast("Login admin berhasil.");
+      } catch (error) {
+        showToast(error.message, 3600);
+      }
+    });
+
+    refreshButton?.addEventListener("click", loadOrders);
+
+    logoutButton?.addEventListener("click", async () => {
+      await fetch("/api/admin-logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
+      sessionStorage.removeItem(adminSessionKey);
+      setPanelState();
+      showToast("Logout berhasil.");
+    });
+
+    orderList.addEventListener("change", async (event) => {
+      const select = event.target.closest("[data-order-status]");
+      if (!select) return;
+      const card = select.closest("[data-order-id]");
+      try {
+        const response = await fetch("/api/orders", {
+          method: "PUT",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            orderId: card.dataset.orderId,
+            status: select.value
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Gagal mengubah status.");
+        }
+        showToast("Status order diperbarui.");
+        await loadOrders();
+      } catch (error) {
+        showToast(error.message, 3600);
+        await loadOrders();
+      }
+    });
+
+    setPanelState();
   }
 
   function readFileAsDataUrl(file) {
@@ -983,7 +1230,9 @@
     renderStaffList();
     renderDonationPage();
     renderVehicleCategoryPhotos();
+    initCheckoutPage();
     initStaffAdmin();
+    initAdminPanelPage();
     refreshServerStatus();
     window.setInterval(refreshServerStatus, 5000);
   }

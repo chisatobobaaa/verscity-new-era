@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Admin panel order donation Verscity Roleplay NewEra.">
+    <title>Admin Panel Order | Verscity Roleplay NewEra</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-server-host="" data-server-port="7777">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Verscity Roleplay Home">
+        <span class="brand-mark">VR</span>
+        <span><strong>Verscity</strong><small>Roleplay NewEra</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="fitur.html">Fitur</a>
+        <a href="roleplay.html">Roleplay</a>
+        <a href="rules.html">Rules</a>
+        <a href="staff.html">Staff</a>
+        <a href="donation.html">Donation</a>
+        <a href="join.html">Join</a>
+      </nav>
+      <button class="icon-button menu-toggle" type="button" aria-label="Buka menu" title="Menu"><span></span><span></span></button>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero compact-hero">
+        <div class="page-hero-inner">
+          <p class="eyebrow">Admin panel</p>
+          <h1>Order donation</h1>
+          <p class="page-lead">Kelola order checkout dari halaman donation dan pantau status pembayaran player.</p>
+        </div>
+      </section>
+
+      <section class="content-band">
+        <div class="content-inner">
+          <form class="admin-card admin-panel-login" data-admin-panel-login>
+            <p class="eyebrow">Login admin</p>
+            <h2>Masuk order panel</h2>
+            <label>
+              Username
+              <input type="text" name="username" autocomplete="username" required>
+            </label>
+            <label>
+              Password
+              <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button class="button button-primary" type="submit">Login</button>
+          </form>
+
+          <section class="admin-order-panel hidden" data-admin-order-panel>
+            <div class="admin-order-head">
+              <div>
+                <p class="eyebrow">Donation orders</p>
+                <h2>Daftar checkout</h2>
+              </div>
+              <div class="admin-actions">
+                <button class="button button-secondary" type="button" data-refresh-orders>Refresh</button>
+                <a class="button button-ghost" href="admin.html">Edit Website</a>
+                <button class="button button-ghost" type="button" data-admin-panel-logout>Logout</button>
+              </div>
+            </div>
+
+            <div class="order-list" data-order-list>
+              <p class="muted-text">Belum ada order.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
+    <div class="toast" role="status" aria-live="polite" data-toast>Admin panel siap.</div>
+    <script src="script.js"></script>
+  </body>
+</html>

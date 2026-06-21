@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Checkout donation Verscity Roleplay NewEra.">
+    <title>Checkout Donation | Verscity Roleplay NewEra</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-server-host="" data-server-port="7777">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Verscity Roleplay Home">
+        <span class="brand-mark">VR</span>
+        <span><strong>Verscity</strong><small>Roleplay NewEra</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="fitur.html">Fitur</a>
+        <a href="roleplay.html">Roleplay</a>
+        <a href="rules.html">Rules</a>
+        <a href="staff.html">Staff</a>
+        <a href="donation.html">Donation</a>
+        <a href="join.html">Join</a>
+      </nav>
+      <button class="icon-button menu-toggle" type="button" aria-label="Buka menu" title="Menu"><span></span><span></span></button>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero compact-hero">
+        <div class="page-hero-inner">
+          <p class="eyebrow">Donation checkout</p>
+          <h1>Checkout paket</h1>
+          <p class="page-lead">Isi data player, lalu order akan masuk ke admin panel Verscity untuk diproses.</p>
+        </div>
+      </section>
+
+      <section class="content-band">
+        <div class="content-inner checkout-layout">
+          <article class="checkout-summary" data-checkout-summary>
+            <p class="eyebrow">Ringkasan</p>
+            <h2>Pilih paket dari halaman donation</h2>
+            <p class="muted-text">Kalau paket belum muncul, kembali ke halaman donation dan klik Checkout pada paket yang dipilih.</p>
+          </article>
+
+          <form class="checkout-form" data-checkout-form>
+            <p class="eyebrow">Data player</p>
+            <h2>Detail order</h2>
+            <input type="hidden" name="packageId">
+            <label>
+              Nama pembeli
+              <input type="text" name="buyerName" autocomplete="name" required>
+            </label>
+            <label>
+              WhatsApp aktif
+              <input type="text" name="whatsapp" inputmode="tel" placeholder="08xxxxxxxxxx" required>
+            </label>
+            <label>
+              Discord
+              <input type="text" name="discord" placeholder="username#0000 / username">
+            </label>
+            <label>
+              Nama karakter IC
+              <input type="text" name="characterName" required>
+            </label>
+            <label>
+              Catatan
+              <textarea name="note" rows="4" placeholder="Warna kendaraan, request plat, atau detail lain."></textarea>
+            </label>
+
+            <div class="checkout-payment-note">
+              <strong>Pembayaran</strong>
+              <span>Order dibuat dulu di web. Admin akan validasi dan memberi instruksi pembayaran. Midtrans bisa disambungkan ke tombol ini setelah key payment siap.</span>
+            </div>
+
+            <button class="button button-primary" type="submit">Buat Order</button>
+            <p class="checkout-result" data-checkout-result></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
+    <div class="toast" role="status" aria-live="polite" data-toast>Order tersimpan.</div>
+    <script src="script.js"></script>
+  </body>
+</html>
