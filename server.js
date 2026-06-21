@@ -4,7 +4,7 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 const { createAdminCookie, clearAdminCookie, isAdminRequest } = require("./lib/admin-auth");
-const { createCheckoutOrder, listOrders, updateOrderFromMidtrans, updateOrderStatus } = require("./lib/orders");
+const { createCheckoutOrder, syncMidtransOrders, updateOrderFromMidtrans, updateOrderStatus } = require("./lib/orders");
 const { readSiteData, writeSiteData } = require("./lib/site-data-store");
 
 const WEB_PORT = Number(process.env.WEB_PORT || 8080);
@@ -240,7 +240,7 @@ async function handleOrders(request, response) {
 
   try {
     if (request.method === "GET") {
-      sendJson(response, 200, { ok: true, orders: await listOrders() });
+      sendJson(response, 200, { ok: true, orders: await syncMidtransOrders() });
       return;
     }
 
