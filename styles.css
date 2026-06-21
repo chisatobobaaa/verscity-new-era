@@ -1157,6 +1157,34 @@ img.staff-avatar {
   color: var(--muted);
 }
 
+.checkout-package-list {
+  display: grid;
+  gap: 10px;
+}
+
+.checkout-package-list a {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.checkout-package-list a:hover {
+  border-color: rgba(242, 184, 75, 0.6);
+}
+
+.checkout-package-list span,
+.checkout-package-list em {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.checkout-package-list strong {
+  color: #fff;
+}
+
 .checkout-form label {
   display: grid;
   gap: 8px;

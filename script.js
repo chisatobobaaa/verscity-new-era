@@ -450,6 +450,33 @@
     return getDonationPackages().find((pkg) => pkg.id === packageId) || null;
   }
 
+  function renderCheckoutPackagePicker() {
+    const packages = getDonationPackages();
+    if (!packages.length) {
+      return `
+        <p class="eyebrow">Paket belum tersedia</p>
+        <h2>Data donation kosong</h2>
+        <p class="muted-text">Admin perlu menyimpan data donation dulu dari admin panel website.</p>
+        <a class="button button-primary" href="donation.html">Kembali ke Donation</a>
+      `;
+    }
+
+    return `
+      <p class="eyebrow">Pilih paket</p>
+      <h2>Pilih paket donation</h2>
+      <p class="muted-text">Klik salah satu paket untuk membuka form checkout.</p>
+      <div class="checkout-package-list">
+        ${packages.map((pkg) => `
+          <a href="checkout.html?package=${encodeURIComponent(pkg.id)}">
+            <span>${escapeHtml(pkg.tier)}</span>
+            <strong>${escapeHtml(pkg.name)}</strong>
+            <em>${escapeHtml(pkg.price)}</em>
+          </a>
+        `).join("")}
+      </div>
+    `;
+  }
+
   function initCheckoutPage() {
     const checkoutForm = document.querySelector("[data-checkout-form]");
     const checkoutSummary = document.querySelector("[data-checkout-summary]");
@@ -459,12 +486,7 @@
     const pkg = findCheckoutPackage();
     if (!pkg) {
       checkoutForm.classList.add("hidden");
-      checkoutSummary.innerHTML = `
-        <p class="eyebrow">Paket tidak ditemukan</p>
-        <h2>Pilih ulang paket donation</h2>
-        <p class="muted-text">Paket ini tidak tersedia atau link checkout tidak lengkap.</p>
-        <a class="button button-primary" href="donation.html">Kembali ke Donation</a>
-      `;
+      checkoutSummary.innerHTML = renderCheckoutPackagePicker();
       return;
     }
 
