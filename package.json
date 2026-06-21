@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "check": "node --check script.js && node --check server.js && node --check api/admin-data.js && node --check api/admin-login.js && node --check api/admin-logout.js && node --check api/checkout.js && node --check api/orders.js && node --check api/server-status.js && node --check lib/admin-auth.js && node --check lib/http-utils.js && node --check lib/orders.js && node --check lib/site-data-store.js"
+    "check": "node --check script.js && node --check server.js && node --check api/admin-data.js && node --check api/admin-login.js && node --check api/admin-logout.js && node --check api/checkout.js && node --check api/midtrans-notification.js && node --check api/orders.js && node --check api/server-status.js && node --check lib/admin-auth.js && node --check lib/http-utils.js && node --check lib/midtrans.js && node --check lib/orders.js && node --check lib/site-data-store.js"
   },
   "engines": {
     "node": ">=18"

@@ -4,7 +4,7 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 const { createAdminCookie, clearAdminCookie, isAdminRequest } = require("./lib/admin-auth");
-const { createCheckoutOrder, listOrders, updateOrderStatus } = require("./lib/orders");
+const { createCheckoutOrder, listOrders, updateOrderFromMidtrans, updateOrderStatus } = require("./lib/orders");
 const { readSiteData, writeSiteData } = require("./lib/site-data-store");
 
 const WEB_PORT = Number(process.env.WEB_PORT || 8080);
@@ -257,6 +257,21 @@ async function handleOrders(request, response) {
   }
 }
 
+async function handleMidtransNotification(request, response) {
+  if (request.method !== "POST") {
+    sendJson(response, 405, { ok: false, error: "Method not allowed" });
+    return;
+  }
+
+  try {
+    const payload = await readJsonBody(request, 1024 * 1024);
+    const order = await updateOrderFromMidtrans(payload);
+    sendJson(response, 200, { ok: true, order });
+  } catch (error) {
+    sendJson(response, 400, { ok: false, error: error.message });
+  }
+}
+
 function serveStatic(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const requestedPath = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
@@ -305,6 +320,11 @@ const server = http.createServer(async (request, response) => {
 
   if (request.url.startsWith("/api/orders")) {
     await handleOrders(request, response);
+    return;
+  }
+
+  if (request.url.startsWith("/api/midtrans-notification")) {
+    await handleMidtransNotification(request, response);
     return;
   }
 

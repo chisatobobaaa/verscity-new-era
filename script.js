@@ -512,9 +512,16 @@
         checkoutForm.reset();
         checkoutForm.elements.packageId.value = pkg.id;
         if (checkoutResult) {
-          checkoutResult.innerHTML = `Order <strong>${escapeHtml(result.order.id)}</strong> berhasil dibuat. Admin akan memproses order kamu.`;
+          checkoutResult.innerHTML = result.order.paymentUrl
+            ? `Order <strong>${escapeHtml(result.order.id)}</strong> berhasil dibuat. Mengarahkan ke Midtrans...`
+            : `Order <strong>${escapeHtml(result.order.id)}</strong> berhasil dibuat. Admin akan memproses order kamu.`;
         }
         showToast("Order checkout berhasil dibuat.");
+        if (result.order.paymentUrl) {
+          window.setTimeout(() => {
+            window.location.href = result.order.paymentUrl;
+          }, 700);
+        }
       } catch (error) {
         if (checkoutResult) checkoutResult.textContent = error.message;
         showToast(error.message, 3600);
@@ -577,8 +584,11 @@
           <div><dt>WhatsApp</dt><dd>${escapeHtml(order.whatsapp)}</dd></div>
           <div><dt>Discord</dt><dd>${escapeHtml(order.discord || "-")}</dd></div>
           <div><dt>Karakter</dt><dd>${escapeHtml(order.characterName)}</dd></div>
+          <div><dt>Payment</dt><dd>${escapeHtml(order.paymentMethod || "manual")}</dd></div>
+          <div><dt>Status Bayar</dt><dd>${escapeHtml(order.paymentStatus || order.status)}</dd></div>
           <div><dt>Dibuat</dt><dd>${escapeHtml(new Date(order.createdAt).toLocaleString("id-ID"))}</dd></div>
         </dl>
+        ${order.paymentUrl ? `<a class="button button-secondary" href="${escapeHtml(order.paymentUrl)}" target="_blank" rel="noreferrer">Buka Payment</a>` : ""}
         ${order.note ? `<p class="order-note">${escapeHtml(order.note)}</p>` : ""}
       </article>
     `).join("");
