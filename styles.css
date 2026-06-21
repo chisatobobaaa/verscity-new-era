@@ -1207,8 +1207,181 @@ img.staff-avatar {
 
 .admin-order-panel.hidden,
 .admin-panel-login.hidden,
+.admin-dashboard.hidden,
+.admin-login-screen.hidden,
 .checkout-form.hidden {
   display: none;
+}
+
+.admin-panel-page {
+  min-height: 100vh;
+  background: #0d1015;
+}
+
+.admin-panel-page .toast {
+  z-index: 40;
+}
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 26px;
+  height: 100vh;
+  padding: 24px;
+  border-right: 1px solid var(--line);
+  background: #101318;
+}
+
+.admin-sidebar-brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-sidebar-brand small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.admin-sidebar-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-sidebar-nav a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 900;
+}
+
+.admin-sidebar-nav a:hover,
+.admin-sidebar-nav a.active {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.admin-sidebar-nav a.active {
+  color: #111418;
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.admin-sidebar-note {
+  align-self: end;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.admin-workspace {
+  min-width: 0;
+  background:
+    radial-gradient(circle at top right, rgba(40, 199, 183, 0.12), transparent 36%),
+    #0d1015;
+}
+
+.admin-login-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.admin-login-box {
+  display: grid;
+  width: min(100%, 460px);
+  gap: 16px;
+  padding: clamp(26px, 5vw, 40px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.admin-login-box h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 4rem);
+}
+
+.admin-login-box label {
+  display: grid;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+}
+
+.admin-login-box input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  outline: none;
+}
+
+.admin-dashboard {
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.admin-dashboard-topbar {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-dashboard-topbar h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 4.8rem);
+}
+
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-stat-grid article {
+  display: grid;
+  gap: 8px;
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.admin-stat-grid span {
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.admin-stat-grid strong {
+  color: #fff;
+  font-size: 2.4rem;
+  line-height: 1;
 }
 
 .admin-order-head,
@@ -1512,6 +1685,19 @@ img.staff-avatar {
 }
 
 @media (max-width: 980px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .admin-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .hero-inner,
   .roleplay-layout,
   .rules-band,
@@ -1543,6 +1729,15 @@ img.staff-avatar {
 }
 
 @media (max-width: 760px) {
+  .admin-dashboard-topbar {
+    display: grid;
+    align-items: stretch;
+  }
+
+  .admin-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .site-header {
     min-height: 66px;
   }
@@ -1690,6 +1885,10 @@ img.staff-avatar {
 }
 
 @media (max-width: 460px) {
+  .admin-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
   .brand small {
     display: none;
   }

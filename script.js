@@ -537,7 +537,21 @@
 
   function renderOrders(orders) {
     const orderList = document.querySelector("[data-order-list]");
+    const orderStats = document.querySelector("[data-order-stats]");
     if (!orderList) return;
+
+    if (orderStats) {
+      const total = orders.length;
+      const pending = orders.filter((order) => order.status === "pending").length;
+      const paid = orders.filter((order) => order.status === "paid" || order.status === "processing").length;
+      const done = orders.filter((order) => order.status === "done").length;
+      orderStats.innerHTML = `
+        <article><span>Total</span><strong>${total}</strong></article>
+        <article><span>Pending</span><strong>${pending}</strong></article>
+        <article><span>Paid</span><strong>${paid}</strong></article>
+        <article><span>Done</span><strong>${done}</strong></article>
+      `;
+    }
 
     if (!orders.length) {
       orderList.innerHTML = `<p class="muted-text">Belum ada order checkout.</p>`;
