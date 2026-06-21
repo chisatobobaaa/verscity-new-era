@@ -564,6 +564,19 @@
     }[status] || status;
   }
 
+  function paymentGatewayLabel(method) {
+    return {
+      midtrans_snap: "Midtrans Snap",
+      manual: "Manual"
+    }[method] || method || "-";
+  }
+
+  function paymentMethodLabel(order) {
+    if (order.paymentType) return String(order.paymentType).toUpperCase();
+    if (order.paymentMethod === "midtrans_snap") return "Belum dipilih / menunggu webhook";
+    return "Manual";
+  }
+
   function renderOrders(orders) {
     const orderList = document.querySelector("[data-order-list]");
     const orderStats = document.querySelector("[data-order-stats]");
@@ -606,7 +619,8 @@
           <div><dt>WhatsApp</dt><dd>${escapeHtml(order.whatsapp)}</dd></div>
           <div><dt>Discord</dt><dd>${escapeHtml(order.discord || "-")}</dd></div>
           <div><dt>Karakter</dt><dd>${escapeHtml(order.characterName)}</dd></div>
-          <div><dt>Payment</dt><dd>${escapeHtml(order.paymentMethod || "manual")}</dd></div>
+          <div><dt>Gateway</dt><dd>${escapeHtml(paymentGatewayLabel(order.paymentMethod))}</dd></div>
+          <div><dt>Metode</dt><dd>${escapeHtml(paymentMethodLabel(order))}</dd></div>
           <div><dt>Status Bayar</dt><dd>${escapeHtml(order.paymentStatus || order.status)}</dd></div>
           <div><dt>Dibuat</dt><dd>${escapeHtml(new Date(order.createdAt).toLocaleString("id-ID"))}</dd></div>
         </dl>
