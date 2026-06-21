@@ -1,5 +1,5 @@
 const { isAdminRequest } = require("../lib/admin-auth");
-const { listOrders, updateOrderStatus } = require("../lib/orders");
+const { syncMidtransOrders, updateOrderStatus } = require("../lib/orders");
 const { readJsonBody, sendJson } = require("../lib/http-utils");
 
 module.exports = async function handler(request, response) {
@@ -10,7 +10,7 @@ module.exports = async function handler(request, response) {
 
   try {
     if (request.method === "GET") {
-      sendJson(response, 200, { ok: true, orders: await listOrders() });
+      sendJson(response, 200, { ok: true, orders: await syncMidtransOrders() });
       return;
     }
 
