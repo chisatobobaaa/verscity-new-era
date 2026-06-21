@@ -572,8 +572,14 @@
   }
 
   function paymentMethodLabel(order) {
-    if (order.paymentType) return String(order.paymentType).toUpperCase();
-    if (order.paymentMethod === "midtrans_snap") return "Belum dipilih / menunggu webhook";
+    const paymentType = String(order.paymentType || order.rawPaymentType || "").toLowerCase();
+    if (paymentType === "qris") return "QRIS / DANA-compatible";
+    if (paymentType === "dana") return "DANA";
+    if (paymentType === "gopay") return "GoPay";
+    if (paymentType === "shopeepay") return "ShopeePay";
+    if (paymentType === "bank_transfer") return "Virtual Account";
+    if (paymentType) return paymentType.toUpperCase();
+    if (order.paymentMethod === "midtrans_snap") return "Menunggu detail dari Midtrans";
     return "Manual";
   }
 
@@ -746,6 +752,25 @@
     setPanelState();
   }
 
+  function initPaymentFinishPage() {
+    const finishCard = document.querySelector("[data-payment-finish]");
+    if (!finishCard) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id") || params.get("orderId") || "";
+    const transactionStatus = params.get("transaction_status") || params.get("status") || "";
+
+    finishCard.innerHTML = `
+      <p class="eyebrow">Payment</p>
+      <h1>${transactionStatus ? escapeHtml(paymentStatusLabel(transactionStatus)) : "Payment diproses"}</h1>
+      <p class="muted-text">${orderId ? `Order ${escapeHtml(orderId)} sedang disinkronkan ke admin panel.` : "Pembayaran kamu sedang diproses oleh Midtrans."}</p>
+      <div class="admin-actions">
+        <a class="button button-primary" href="donation.html">Kembali ke Donation</a>
+        <a class="button button-secondary" href="admin-panel.html">Admin Panel</a>
+      </div>
+    `;
+  }
+
   function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -796,6 +821,8 @@
     const logoutButton = document.querySelector("[data-admin-logout]");
     const resetButton = document.querySelector("[data-reset-staff]");
     const removePhotoButton = document.querySelector("[data-remove-photo]");
+    const addStaffButton = document.querySelector("[data-add-staff]");
+    const deleteStaffButton = document.querySelector("[data-delete-staff]");
     const donationPreviewName = document.querySelector("[data-donation-preview-name]");
     const donationPreviewMeta = document.querySelector("[data-donation-preview-meta]");
     const addDonationButton = document.querySelector("[data-add-donation]");
@@ -825,6 +852,21 @@
       staffSelect.innerHTML = staffList
         .map((staff) => `<option value="${escapeHtml(staff.id)}">${escapeHtml(staff.rank)} - ${escapeHtml(staff.name)}</option>`)
         .join("");
+    }
+
+    function makeStaffId(name) {
+      const base = String(name || "staff")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "staff";
+      let candidate = base;
+      let index = 2;
+      while (staffList.some((staff) => staff.id === candidate)) {
+        candidate = `${base}-${index}`;
+        index += 1;
+      }
+      return candidate;
     }
 
     function groupLabel(group) {
@@ -1191,6 +1233,7 @@
         fillStaffOptions();
         staffSelect.value = selectedId;
         fillStaffForm();
+        renderStaffList();
         showToast("Profil staff berhasil disimpan global.");
       } catch (error) {
         showToast(error.message, 3600);
@@ -1203,7 +1246,51 @@
         await saveStaffList(staffList);
         fillStaffOptions();
         fillStaffForm();
+        renderStaffList();
         showToast("Data staff global kembali ke default.");
+      } catch (error) {
+        showToast(error.message, 3600);
+      }
+    });
+
+    addStaffButton?.addEventListener("click", async () => {
+      const newStaff = {
+        id: makeStaffId("Staff Baru"),
+        rank: "Helper",
+        name: "Staff Baru",
+        description: "Deskripsi staff baru.",
+        status: "standby",
+        initials: "SB",
+        photo: ""
+      };
+
+      staffList = [...staffList, newStaff];
+      try {
+        await saveStaffList(staffList);
+        fillStaffOptions();
+        staffSelect.value = newStaff.id;
+        fillStaffForm();
+        renderStaffList();
+        showToast("Staff baru berhasil ditambahkan global.");
+      } catch (error) {
+        showToast(error.message, 3600);
+      }
+    });
+
+    deleteStaffButton?.addEventListener("click", async () => {
+      if (staffList.length <= 1) {
+        showToast("Minimal harus ada 1 staff.", 3200);
+        return;
+      }
+
+      const selectedId = staffSelect.value;
+      staffList = staffList.filter((staff) => staff.id !== selectedId);
+      try {
+        await saveStaffList(staffList);
+        fillStaffOptions();
+        fillStaffForm();
+        renderStaffList();
+        showToast("Staff berhasil dihapus global.");
       } catch (error) {
         showToast(error.message, 3600);
       }
@@ -1306,6 +1393,7 @@
     initCheckoutPage();
     initStaffAdmin();
     initAdminPanelPage();
+    initPaymentFinishPage();
     refreshServerStatus();
     window.setInterval(refreshServerStatus, 5000);
   }
