@@ -1,0 +1,22 @@
+{
+  "orders": [
+    {
+      "id": "VR-1782054237660-6832EF",
+      "packageId": "vip-silver",
+      "packageName": "VIP Silver",
+      "packageGroup": "vip",
+      "tier": "VIP Basic",
+      "price": "Rp35.000",
+      "amount": 35000,
+      "buyerName": "Test Buyer",
+      "whatsapp": "08123456789",
+      "discord": "tester",
+      "characterName": "Test_Char",
+      "note": "test order",
+      "status": "pending",
+      "paymentMethod": "manual",
+      "createdAt": "2026-06-21T15:03:57.663Z",
+      "updatedAt": "2026-06-21T15:03:57.664Z"
+    }
+  ]
+}
