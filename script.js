@@ -577,6 +577,19 @@
     return "Manual";
   }
 
+  function paymentStatusLabel(status) {
+    return {
+      settlement: "Paid",
+      capture: "Paid",
+      paid: "Paid",
+      pending: "Pending",
+      cancelled: "Cancelled",
+      cancel: "Cancelled",
+      expire: "Expired",
+      deny: "Denied"
+    }[status] || status || "-";
+  }
+
   function renderOrders(orders) {
     const orderList = document.querySelector("[data-order-list]");
     const orderStats = document.querySelector("[data-order-stats]");
@@ -621,7 +634,7 @@
           <div><dt>Karakter</dt><dd>${escapeHtml(order.characterName)}</dd></div>
           <div><dt>Gateway</dt><dd>${escapeHtml(paymentGatewayLabel(order.paymentMethod))}</dd></div>
           <div><dt>Metode</dt><dd>${escapeHtml(paymentMethodLabel(order))}</dd></div>
-          <div><dt>Status Bayar</dt><dd>${escapeHtml(order.paymentStatus || order.status)}</dd></div>
+          <div><dt>Status Bayar</dt><dd>${escapeHtml(paymentStatusLabel(order.paymentStatus || order.status))}</dd></div>
           <div><dt>Dibuat</dt><dd>${escapeHtml(new Date(order.createdAt).toLocaleString("id-ID"))}</dd></div>
         </dl>
         ${order.paymentUrl ? `<a class="button button-secondary" href="${escapeHtml(order.paymentUrl)}" target="_blank" rel="noreferrer">Buka Payment</a>` : ""}
