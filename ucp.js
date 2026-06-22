@@ -6,6 +6,16 @@ module.exports = async function handler(request, response) {
   try {
     if (request.method === "POST") {
       const payload = await readJsonBody(request, 256 * 1024);
+      if (payload.action === "delete") {
+        if (!isAdminRequest(request)) {
+          sendJson(response, 401, { ok: false, error: "Unauthorized" });
+          return;
+        }
+
+        sendJson(response, 200, { ok: true, ucp: await deleteUcp(payload.id || payload.mysqlId) });
+        return;
+      }
+
       const ucp = await createUcp(payload);
       sendJson(response, 200, { ok: true, ucp });
       return;

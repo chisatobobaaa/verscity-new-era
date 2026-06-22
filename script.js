@@ -858,12 +858,12 @@
         deleteButton.disabled = true;
         try {
           const response = await fetch("/api/ucp", {
-            method: "DELETE",
+            method: "POST",
             credentials: "same-origin",
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ id: ucpId })
+            body: JSON.stringify({ action: "delete", id: ucpId })
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok || !result.ok) {
