@@ -1473,6 +1473,46 @@ img.staff-avatar {
   overflow-wrap: anywhere;
 }
 
+.ucp-admin-list {
+  overflow-x: auto;
+}
+
+.ucp-admin-table {
+  min-width: 680px;
+  display: grid;
+  gap: 8px;
+}
+
+.ucp-admin-row {
+  display: grid;
+  grid-template-columns: 92px minmax(160px, 1fr) 140px minmax(180px, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ucp-admin-head {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ucp-code-pill {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(249, 184, 62, 0.52);
+  border-radius: 8px;
+  background: rgba(249, 184, 62, 0.11);
+  color: #fff;
+  font: inherit;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
 .ucp-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.55fr);

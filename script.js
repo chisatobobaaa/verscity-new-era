@@ -669,12 +669,55 @@
     return result.orders || [];
   }
 
+  function renderAdminUcps(ucps) {
+    const ucpList = document.querySelector("[data-ucp-admin-list]");
+    if (!ucpList) return;
+
+    if (!ucps.length) {
+      ucpList.innerHTML = `<p class="muted-text">Belum ada UCP.</p>`;
+      return;
+    }
+
+    ucpList.innerHTML = `
+      <div class="ucp-admin-table">
+        <div class="ucp-admin-row ucp-admin-head">
+          <span>ID</span>
+          <span>UCP</span>
+          <span>Kode</span>
+          <span>DiscordID</span>
+        </div>
+        ${ucps.map((ucp) => `
+          <div class="ucp-admin-row">
+            <span>${escapeHtml(ucp.mysqlId || ucp.id || "-")}</span>
+            <strong>${escapeHtml(ucp.ucpName || ucp.ucp || "-")}</strong>
+            <button class="ucp-code-pill" type="button" data-copy-value="${escapeHtml(ucp.verifyCode || ucp.verifycode || "")}">${escapeHtml(ucp.verifyCode || ucp.verifycode || "-")}</button>
+            <span>${escapeHtml(ucp.DiscordID || "-")}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  async function fetchUcps() {
+    const response = await fetch("/api/ucp", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "Gagal mengambil UCP.");
+    }
+    return result.ucps || [];
+  }
+
   async function initAdminPanelPage() {
     const loginForm = document.querySelector("[data-admin-panel-login]");
     const panel = document.querySelector("[data-admin-order-panel]");
     const refreshButton = document.querySelector("[data-refresh-orders]");
+    const refreshUcpsButton = document.querySelector("[data-refresh-ucps]");
     const logoutButton = document.querySelector("[data-admin-panel-logout]");
     const orderList = document.querySelector("[data-order-list]");
+    const ucpList = document.querySelector("[data-ucp-admin-list]");
     if (!loginForm || !panel || !orderList) return;
 
     async function loadOrders() {
@@ -685,11 +728,23 @@
       }
     }
 
+    async function loadUcps() {
+      if (!ucpList) return;
+      try {
+        renderAdminUcps(await fetchUcps());
+      } catch (error) {
+        ucpList.innerHTML = `<p class="muted-text">${escapeHtml(error.message)}</p>`;
+      }
+    }
+
     function setPanelState() {
       const loggedIn = sessionStorage.getItem(adminSessionKey) === "true";
       loginForm.classList.toggle("hidden", loggedIn);
       panel.classList.toggle("hidden", !loggedIn);
-      if (loggedIn) loadOrders();
+      if (loggedIn) {
+        loadOrders();
+        loadUcps();
+      }
     }
 
     loginForm.addEventListener("submit", async (event) => {
@@ -721,6 +776,7 @@
     });
 
     refreshButton?.addEventListener("click", loadOrders);
+    refreshUcpsButton?.addEventListener("click", loadUcps);
 
     logoutButton?.addEventListener("click", async () => {
       await fetch("/api/admin-logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
@@ -754,6 +810,19 @@
       } catch (error) {
         showToast(error.message, 3600);
         await loadOrders();
+      }
+    });
+
+    ucpList?.addEventListener("click", async (event) => {
+      const copyButton = event.target.closest("[data-copy-value]");
+      if (!copyButton) return;
+      const value = copyButton.dataset.copyValue || "";
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        showToast("Kode verifikasi UCP disalin.");
+      } catch (error) {
+        showToast("Gagal menyalin kode.", 3200);
       }
     });
 
