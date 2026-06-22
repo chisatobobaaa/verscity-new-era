@@ -332,6 +332,14 @@
 
     if (!response.ok) {
       const result = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        sessionStorage.removeItem(adminSessionKey);
+        document.querySelector("[data-login-form]")?.classList.remove("hidden");
+        document.querySelector("[data-staff-form]")?.classList.add("hidden");
+        document.querySelector("[data-donation-form]")?.classList.add("hidden");
+        document.querySelector("[data-vehicle-category-form]")?.classList.add("hidden");
+        throw new Error("Sesi admin habis. Login ulang dulu, lalu simpan lagi.");
+      }
       throw new Error(result.error || "Gagal menyimpan data global");
     }
 
