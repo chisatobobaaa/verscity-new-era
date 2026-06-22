@@ -1473,6 +1473,109 @@ img.staff-avatar {
   overflow-wrap: anywhere;
 }
 
+.ucp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.55fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ucp-form,
+.ucp-rules {
+  display: grid;
+  gap: 16px;
+  padding: clamp(22px, 4vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.ucp-form label {
+  display: grid;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 900;
+}
+
+.ucp-form input,
+.ucp-form textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  outline: none;
+}
+
+.ucp-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.ucp-form input:focus,
+.ucp-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(249, 184, 62, 0.16);
+}
+
+.ucp-rules ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.ucp-result {
+  min-height: 24px;
+  margin: 0;
+  color: var(--muted);
+}
+
+.ucp-result strong {
+  color: #fff;
+}
+
+.ucp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(6, 7, 10, 0.78);
+}
+
+.ucp-modal[hidden] {
+  display: none;
+}
+
+.ucp-modal-card {
+  width: min(100%, 440px);
+  display: grid;
+  gap: 16px;
+  padding: clamp(22px, 5vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.ucp-code {
+  padding: 18px;
+  border: 1px solid rgba(249, 184, 62, 0.55);
+  border-radius: 8px;
+  background: rgba(249, 184, 62, 0.1);
+  color: #fff;
+  font-size: clamp(2rem, 9vw, 3.4rem);
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  letter-spacing: 0;
+}
+
 .vehicle-category-grid,
 .vehicle-list-grid {
   display: grid;
@@ -1731,7 +1834,8 @@ img.staff-avatar {
   .rules-band,
   .join-section,
   .join-panel,
-  .admin-layout {
+  .admin-layout,
+  .ucp-layout {
     grid-template-columns: 1fr;
   }
 

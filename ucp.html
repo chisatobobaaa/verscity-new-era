@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Buat UCP Verscity Roleplay NewEra dan dapatkan kode verifikasi.">
+    <title>Buat UCP | Verscity Roleplay NewEra</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-server-host="" data-server-port="7777">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Verscity Roleplay Home">
+        <span class="brand-mark">VR</span>
+        <span><strong>Verscity</strong><small>Roleplay NewEra</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="fitur.html">Fitur</a>
+        <a href="roleplay.html">Roleplay</a>
+        <a href="rules.html">Rules</a>
+        <a href="staff.html">Staff</a>
+        <a href="donation.html">Donation</a>
+        <a href="ucp.html">UCP</a>
+        <a href="join.html">Join</a>
+      </nav>
+      <button class="icon-button menu-toggle" type="button" aria-label="Buka menu" title="Menu"><span></span><span></span></button>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero">
+        <div class="page-hero-inner">
+          <p class="eyebrow">User control panel</p>
+          <h1>Buat UCP</h1>
+          <p class="page-lead">Daftarkan nama UCP sebelum masuk kota. Setelah berhasil, kode verifikasi akan muncul dan bisa disalin.</p>
+        </div>
+      </section>
+
+      <section class="content-band">
+        <div class="content-inner ucp-layout">
+          <form class="ucp-form" data-ucp-form>
+            <p class="eyebrow">Registrasi UCP</p>
+            <h2>Data akun</h2>
+            <label>
+              Nama UCP
+              <input type="text" name="ucpName" placeholder="contoh: Mardi_RP" minlength="4" maxlength="22" required>
+            </label>
+            <button class="button button-primary" type="submit">Buat UCP</button>
+            <p class="ucp-result" data-ucp-result></p>
+          </form>
+
+          <aside class="ucp-rules">
+            <p class="eyebrow">Rules UCP</p>
+            <h2>Satu orang satu UCP</h2>
+            <ul>
+              <li>Nama UCP tidak bisa dibuat dua kali.</li>
+              <li>Nama UCP hanya boleh huruf, angka, dan underscore.</li>
+              <li>Panjang nama mengikuti database server: 4 sampai 22 karakter.</li>
+              <li>Simpan kode verifikasi untuk proses masuk/registrasi di server.</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
+    <div class="ucp-modal" data-ucp-modal hidden>
+      <div class="ucp-modal-card" role="dialog" aria-modal="true" aria-labelledby="ucp-modal-title">
+        <p class="eyebrow">Kode verifikasi</p>
+        <h2 id="ucp-modal-title">UCP berhasil dibuat</h2>
+        <p class="muted-text">Salin kode ini dan simpan baik-baik.</p>
+        <div class="ucp-code" data-ucp-code>000000</div>
+        <div class="admin-actions">
+          <button class="button button-primary" type="button" data-copy-ucp-code>Salin Kode</button>
+          <button class="button button-secondary" type="button" data-close-ucp-modal>Tutup</button>
+        </div>
+      </div>
+    </div>
+    <div class="toast" role="status" aria-live="polite" data-toast>UCP berhasil dibuat.</div>
+    <script src="script.js"></script>
+  </body>
+</html>

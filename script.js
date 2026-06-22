@@ -779,6 +779,83 @@
     `;
   }
 
+  function initUcpPage() {
+    const ucpForm = document.querySelector("[data-ucp-form]");
+    const ucpResult = document.querySelector("[data-ucp-result]");
+    const ucpModal = document.querySelector("[data-ucp-modal]");
+    const ucpCode = document.querySelector("[data-ucp-code]");
+    const copyUcpCodeButton = document.querySelector("[data-copy-ucp-code]");
+    const closeUcpModalButton = document.querySelector("[data-close-ucp-modal]");
+    if (!ucpForm) return;
+
+    const closeModal = () => {
+      if (ucpModal) ucpModal.hidden = true;
+    };
+
+    if (closeUcpModalButton) {
+      closeUcpModalButton.addEventListener("click", closeModal);
+    }
+
+    if (ucpModal) {
+      ucpModal.addEventListener("click", (event) => {
+        if (event.target === ucpModal) closeModal();
+      });
+    }
+
+    if (copyUcpCodeButton) {
+      copyUcpCodeButton.addEventListener("click", async () => {
+        const code = ucpCode ? ucpCode.textContent.trim() : "";
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code);
+          showToast("Kode verifikasi disalin.");
+        } catch (error) {
+          showToast("Gagal menyalin kode. Salin manual dari popup.", 3600);
+        }
+      });
+    }
+
+    ucpForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submitButton = ucpForm.querySelector("button[type='submit']");
+      const payload = {
+        ucpName: ucpForm.elements.ucpName.value
+      };
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Membuat UCP...";
+      if (ucpResult) ucpResult.textContent = "";
+
+      try {
+        const response = await fetch("/api/ucp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Gagal membuat UCP.");
+        }
+
+        ucpForm.reset();
+        if (ucpCode) ucpCode.textContent = result.ucp.verifyCode || String(result.ucp.verifycode || "");
+        if (ucpModal) ucpModal.hidden = false;
+        if (ucpResult) {
+          ucpResult.innerHTML = `UCP <strong>${escapeHtml(result.ucp.ucpName)}</strong> berhasil dibuat. Kode verifikasi muncul di popup.`;
+        }
+        showToast("UCP berhasil dibuat.");
+      } catch (error) {
+        if (ucpResult) ucpResult.textContent = error.message;
+        showToast(error.message, 3800);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Buat UCP";
+      }
+    });
+  }
+
   function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1402,6 +1479,7 @@
     initStaffAdmin();
     initAdminPanelPage();
     initPaymentFinishPage();
+    initUcpPage();
     refreshServerStatus();
     window.setInterval(refreshServerStatus, 5000);
   }
