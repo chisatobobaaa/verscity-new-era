@@ -85,6 +85,18 @@
               <button class="button button-secondary" type="button" data-refresh-ucps>Refresh UCP</button>
             </div>
 
+            <form class="ucp-admin-form" data-admin-create-ucp>
+              <label>
+                Nama UCP
+                <input type="text" name="ucpName" placeholder="contoh: Mardi_RP" minlength="4" maxlength="22" required>
+              </label>
+              <label>
+                Discord ID
+                <input type="text" name="discordId" inputmode="numeric" placeholder="123456789012345678" minlength="17" maxlength="20" required>
+              </label>
+              <button class="button button-primary" type="submit">Tambah UCP</button>
+            </form>
+
             <div class="ucp-admin-list" data-ucp-admin-list>
               <p class="muted-text">Login untuk melihat UCP.</p>
             </div>

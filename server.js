@@ -6,6 +6,7 @@ const path = require("path");
 const { createAdminCookie, clearAdminCookie, isAdminRequest } = require("./lib/admin-auth");
 const { createCheckoutOrder, syncMidtransOrders, updateOrderFromMidtrans, updateOrderStatus } = require("./lib/orders");
 const { readSiteData, writeSiteData } = require("./lib/site-data-store");
+const { createUcp, deleteUcp, listUcps } = require("./lib/ucp");
 
 const WEB_PORT = Number(process.env.WEB_PORT || 8080);
 const SAMP_HOST = process.env.SAMP_HOST || "127.0.0.1";
@@ -187,7 +188,11 @@ async function handleAdminData(request, response) {
     await writeSiteData(payload.data || {});
     sendJson(response, 200, { ok: true });
   } catch (error) {
-    sendJson(response, 400, { ok: false, error: error.message });
+    const isDatabaseAccessError = error.code === "ER_ACCESS_DENIED_ERROR" || /access denied/i.test(error.message);
+    sendJson(response, 400, {
+      ok: false,
+      error: isDatabaseAccessError ? "Database UCP belum bisa login. Cek MYSQL_PASSWORD di Vercel." : error.message
+    });
   }
 }
 
@@ -272,6 +277,42 @@ async function handleMidtransNotification(request, response) {
   }
 }
 
+async function handleUcp(request, response) {
+  try {
+    if (request.method === "POST") {
+      const payload = await readJsonBody(request, 256 * 1024);
+      const ucp = await createUcp(payload);
+      sendJson(response, 200, { ok: true, ucp });
+      return;
+    }
+
+      if (request.method === "GET") {
+        if (!isAdminRequest(request)) {
+          sendJson(response, 401, { ok: false, error: "Unauthorized" });
+          return;
+        }
+
+      sendJson(response, 200, { ok: true, ucps: await listUcps() });
+        return;
+      }
+
+      if (request.method === "DELETE") {
+        if (!isAdminRequest(request)) {
+          sendJson(response, 401, { ok: false, error: "Unauthorized" });
+          return;
+        }
+
+        const payload = await readJsonBody(request, 32 * 1024);
+        sendJson(response, 200, { ok: true, ucp: await deleteUcp(payload.id || payload.mysqlId) });
+        return;
+      }
+
+      sendJson(response, 405, { ok: false, error: "Method not allowed" });
+  } catch (error) {
+    sendJson(response, 400, { ok: false, error: error.message });
+  }
+}
+
 function serveStatic(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const requestedPath = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
@@ -325,6 +366,11 @@ const server = http.createServer(async (request, response) => {
 
   if (request.url.startsWith("/api/midtrans-notification")) {
     await handleMidtransNotification(request, response);
+    return;
+  }
+
+  if (request.url.startsWith("/api/ucp")) {
+    await handleUcp(request, response);
     return;
   }
 

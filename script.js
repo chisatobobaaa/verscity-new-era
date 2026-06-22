@@ -685,13 +685,15 @@
           <span>UCP</span>
           <span>Kode</span>
           <span>DiscordID</span>
+          <span>Aksi</span>
         </div>
         ${ucps.map((ucp) => `
-          <div class="ucp-admin-row">
+          <div class="ucp-admin-row" data-ucp-id="${escapeHtml(ucp.mysqlId || ucp.id || "")}">
             <span>${escapeHtml(ucp.mysqlId || ucp.id || "-")}</span>
             <strong>${escapeHtml(ucp.ucpName || ucp.ucp || "-")}</strong>
             <button class="ucp-code-pill" type="button" data-copy-value="${escapeHtml(ucp.verifyCode || ucp.verifycode || "")}">${escapeHtml(ucp.verifyCode || ucp.verifycode || "-")}</button>
             <span>${escapeHtml(ucp.DiscordID || "-")}</span>
+            <button class="button button-ghost" type="button" data-delete-ucp>Hapus</button>
           </div>
         `).join("")}
       </div>
@@ -715,6 +717,7 @@
     const panel = document.querySelector("[data-admin-order-panel]");
     const refreshButton = document.querySelector("[data-refresh-orders]");
     const refreshUcpsButton = document.querySelector("[data-refresh-ucps]");
+    const createUcpForm = document.querySelector("[data-admin-create-ucp]");
     const logoutButton = document.querySelector("[data-admin-panel-logout]");
     const orderList = document.querySelector("[data-order-list]");
     const ucpList = document.querySelector("[data-ucp-admin-list]");
@@ -778,6 +781,38 @@
     refreshButton?.addEventListener("click", loadOrders);
     refreshUcpsButton?.addEventListener("click", loadUcps);
 
+    createUcpForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submitButton = createUcpForm.querySelector("button[type='submit']");
+      submitButton.disabled = true;
+      submitButton.textContent = "Menambah...";
+      try {
+        const response = await fetch("/api/ucp", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            ucpName: createUcpForm.elements.ucpName.value,
+            discordId: createUcpForm.elements.discordId.value
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Gagal menambah UCP.");
+        }
+        createUcpForm.reset();
+        showToast(`UCP ${result.ucp.ucpName} ditambahkan. Kode: ${result.ucp.verifyCode || result.ucp.verifycode}`);
+        await loadUcps();
+      } catch (error) {
+        showToast(error.message, 4200);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Tambah UCP";
+      }
+    });
+
     logoutButton?.addEventListener("click", async () => {
       await fetch("/api/admin-logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
       sessionStorage.removeItem(adminSessionKey);
@@ -814,6 +849,35 @@
     });
 
     ucpList?.addEventListener("click", async (event) => {
+      const deleteButton = event.target.closest("[data-delete-ucp]");
+      if (deleteButton) {
+        const row = deleteButton.closest("[data-ucp-id]");
+        const ucpId = row?.dataset.ucpId || "";
+        if (!ucpId) return;
+        if (!window.confirm("Hapus UCP ini dari playerucp?")) return;
+        deleteButton.disabled = true;
+        try {
+          const response = await fetch("/api/ucp", {
+            method: "DELETE",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: ucpId })
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.ok) {
+            throw new Error(result.error || "Gagal menghapus UCP.");
+          }
+          showToast("UCP berhasil dihapus.");
+          await loadUcps();
+        } catch (error) {
+          showToast(error.message, 4200);
+          deleteButton.disabled = false;
+        }
+        return;
+      }
+
       const copyButton = event.target.closest("[data-copy-value]");
       if (!copyButton) return;
       const value = copyButton.dataset.copyValue || "";
@@ -888,7 +952,8 @@
       event.preventDefault();
       const submitButton = ucpForm.querySelector("button[type='submit']");
       const payload = {
-        ucpName: ucpForm.elements.ucpName.value
+        ucpName: ucpForm.elements.ucpName.value,
+        discordId: ucpForm.elements.discordId.value
       };
 
       submitButton.disabled = true;
