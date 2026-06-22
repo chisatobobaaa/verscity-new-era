@@ -834,9 +834,18 @@
           },
           body: JSON.stringify(payload)
         });
-        const result = await response.json().catch(() => ({}));
+        const responseText = await response.text();
+        let result = {};
+        try {
+          result = responseText ? JSON.parse(responseText) : {};
+        } catch (error) {
+          result = {};
+        }
         if (!response.ok || !result.ok) {
-          throw new Error(result.error || "Gagal membuat UCP.");
+          if (response.status === 404) {
+            throw new Error("API UCP belum terdeploy. Upload folder api dan lib lalu redeploy Vercel.");
+          }
+          throw new Error(result.error || responseText || "Gagal membuat UCP.");
         }
 
         ucpForm.reset();
