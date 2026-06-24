@@ -254,6 +254,16 @@
     return defaultDonationPackages.map((item) => ({ ...item, benefits: [...item.benefits] }));
   }
 
+  function hasCachedDonationPackages() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(donationStorageKey));
+      return Array.isArray(stored) && stored.length > 0;
+    } catch (error) {
+      localStorage.removeItem(donationStorageKey);
+      return false;
+    }
+  }
+
   async function saveDonationPackages(packages) {
     siteDataState.donationPackages = packages;
     localStorage.setItem(donationStorageKey, JSON.stringify(packages));
@@ -1700,9 +1710,16 @@
       document.documentElement.classList.add("site-data-ready");
     }
 
+    const hasDonationCache = hasCachedDonationPackages();
+    if (hasDonationCache) {
+      renderDonationPage();
+      document.documentElement.classList.add("donation-data-ready");
+    }
+
     await loadGlobalSiteData();
     renderStaffList();
     renderDonationPage();
+    document.documentElement.classList.add("donation-data-ready");
     renderVehicleCategoryPhotos();
     document.documentElement.classList.add("site-data-ready");
     initCheckoutPage();

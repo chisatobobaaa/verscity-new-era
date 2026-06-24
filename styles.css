@@ -1749,6 +1749,11 @@ html:not(.site-data-ready) [data-vehicle-category-photo] {
   visibility: hidden;
 }
 
+html:not(.donation-data-ready) .donation-grid,
+html:not(.donation-data-ready) .vehicle-list-grid {
+  visibility: hidden;
+}
+
 .vehicle-preview,
 .vehicle-photo {
   min-height: 170px;
