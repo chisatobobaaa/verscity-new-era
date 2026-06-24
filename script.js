@@ -86,9 +86,12 @@
     { id: "house-small", group: "house", tier: "House", name: "Small House", price: "Rp80.000", benefits: ["Rumah kecil sesuai slot tersedia", "Interior basic", "Storage rumah standar"], featured: false, photo: "", photoClass: "" },
     { id: "house-medium", group: "house", tier: "House", name: "Medium House", price: "Rp150.000", benefits: ["Rumah menengah sesuai slot tersedia", "Interior premium", "Storage lebih besar"], featured: true, photo: "", photoClass: "" },
     { id: "house-luxury", group: "house", tier: "House", name: "Luxury House", price: "Rp250.000", benefits: ["Rumah luxury sesuai approval", "Interior pilihan", "Lokasi dibahas lewat ticket"], featured: false, photo: "", photoClass: "" },
-    { id: "bisnis-small", group: "bisnis", tier: "Business", name: "Small Business", price: "Rp100.000", benefits: ["Bisnis kecil sesuai sistem server", "Nama bisnis custom", "Setup awal oleh staff"], featured: false, photo: "", photoClass: "" },
-    { id: "bisnis-premium", group: "bisnis", tier: "Business", name: "Premium Business", price: "Rp200.000", benefits: ["Bisnis premium sesuai approval", "Nama dan konsep bisnis custom", "Prioritas lokasi jika tersedia"], featured: true, photo: "", photoClass: "" },
-    { id: "bisnis-partner", group: "bisnis", tier: "Business", name: "Partner Brand", price: "Rp300.000", benefits: ["Konsep bisnis dibahas dengan owner", "Branding dan label custom", "Rules ekonomi tetap mengikuti server"], featured: false, photo: "", photoClass: "" },
+    { id: "bisnis-market", group: "bisnis", tier: "Market", name: "Market", price: "Rp100.000", benefits: ["Menjual kebutuhan harian player", "Harga produk dapat diatur pemilik", "Mendukung stock dan restock bisnis"], featured: false, photo: "", photoClass: "" },
+    { id: "bisnis-electronic", group: "bisnis", tier: "Electronic", name: "Electronic Store", price: "Rp125.000", benefits: ["Menjual smartphone dan radio", "Menjual earphone, boombox, dan vape", "Mendukung stock dan restock bisnis"], featured: false, photo: "", photoClass: "" },
+    { id: "bisnis-ammunation", group: "bisnis", tier: "Ammunation", name: "Ammunation", price: "Rp200.000", benefits: ["Menjual perlengkapan olahraga dan senjata", "Harga setiap produk dapat diatur", "Kepemilikan mengikuti approval server"], featured: true, photo: "", photoClass: "" },
+    { id: "bisnis-pom", group: "bisnis", tier: "Fuel", name: "Pom Bensin", price: "Rp250.000", benefits: ["Menjual BBM per liter", "Menjual jerigen bahan bakar", "Harga BBM dan jerigen dapat diatur"], featured: false, photo: "", photoClass: "" },
+    { id: "bisnis-fastfood", group: "bisnis", tier: "Food", name: "Fast Food", price: "Rp150.000", benefits: ["Menjual pizza, burger, dan fried chicken", "Menjual minuman Sprunk", "Mendukung stock dan restock bisnis"], featured: false, photo: "", photoClass: "" },
+    { id: "bisnis-clothes", group: "bisnis", tier: "Fashion", name: "Clothes Store", price: "Rp125.000", benefits: ["Menjual pakaian dan topi atau helm", "Menjual kacamata dan aksesoris", "Menjual tas atau backpack"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-tag", group: "lainnya", tier: "Custom", name: "Custom Tag", price: "Rp20.000", benefits: ["Tag custom sesuai rules", "Warna tag dibahas lewat ticket", "Tidak boleh menyerupai staff"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-number", group: "lainnya", tier: "Custom", name: "Custom Number", price: "Rp25.000", benefits: ["Nomor pilihan jika tersedia", "Validasi oleh staff", "Tidak boleh mengandung konten terlarang"], featured: true, photo: "", photoClass: "" },
     { id: "lainnya-request", group: "lainnya", tier: "Request", name: "Special Request", price: "Ticket", benefits: ["Request item kosmetik", "Request mapping kecil", "Harga dan approval lewat owner"], featured: false, photo: "", photoClass: "" },
@@ -197,7 +200,18 @@
   }
 
   function normalizeDonationPackages(list) {
-    return list.map((item) => {
+    const legacyBusinessIds = new Set(["bisnis-small", "bisnis-premium", "bisnis-partner"]);
+    const hasLegacyBusinessPackages = list.some((item) => legacyBusinessIds.has(item.id));
+    const source = hasLegacyBusinessPackages
+      ? [
+          ...list.filter((item) => item.group !== "bisnis"),
+          ...defaultDonationPackages
+            .filter((item) => item.group === "bisnis")
+            .map((item) => ({ ...item, benefits: [...item.benefits] }))
+        ]
+      : list;
+
+    return source.map((item) => {
       const defaultItem = defaultDonationPackages.find((pkg) => pkg.id === item.id) || {};
       return {
         ...defaultItem,
