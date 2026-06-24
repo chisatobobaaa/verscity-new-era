@@ -4,6 +4,7 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 const { createAdminCookie, clearAdminCookie, isAdminRequest } = require("./lib/admin-auth");
+const { avatarUrl, clearDiscordCookies, createDiscordCookie, exchangeDiscordCode, makeDiscordLoginUrl, readDiscordSession, validateState } = require("./lib/discord-auth");
 const { createCheckoutOrder, syncMidtransOrders, updateOrderFromMidtrans, updateOrderStatus } = require("./lib/orders");
 const { readSiteData, writeSiteData } = require("./lib/site-data-store");
 const { createUcp, deleteUcp, listUcps } = require("./lib/ucp");
@@ -222,6 +223,65 @@ function handleAdminLogout(response) {
   sendJson(response, 200, { ok: true });
 }
 
+function handleDiscordLogin(request, response) {
+  try {
+    const login = makeDiscordLoginUrl(request);
+    response.writeHead(302, {
+      "Set-Cookie": login.stateCookie,
+      Location: login.url
+    });
+    response.end();
+  } catch (error) {
+    sendJson(response, 500, { ok: false, error: error.message });
+  }
+}
+
+async function handleDiscordCallback(request, response) {
+  try {
+    const url = new URL(request.url, `http://${request.headers.host}`);
+    const code = url.searchParams.get("code") || "";
+    const state = url.searchParams.get("state") || "";
+    if (!code || !validateState(request, state)) {
+      throw new Error("State Discord tidak valid. Coba login ulang.");
+    }
+
+    const user = await exchangeDiscordCode(request, code);
+    response.writeHead(302, {
+      "Set-Cookie": [createDiscordCookie(user), ...clearDiscordCookies().slice(1)],
+      Location: "/ucp.html"
+    });
+    response.end();
+  } catch (error) {
+    response.writeHead(302, {
+      Location: `/ucp.html?discord_error=${encodeURIComponent(error.message)}`
+    });
+    response.end();
+  }
+}
+
+function handleDiscordMe(request, response) {
+  const user = readDiscordSession(request);
+  if (!user) {
+    sendJson(response, 200, { ok: true, user: null });
+    return;
+  }
+
+  sendJson(response, 200, {
+    ok: true,
+    user: {
+      id: user.id,
+      username: user.username,
+      globalName: user.globalName,
+      avatar: avatarUrl(user)
+    }
+  });
+}
+
+function handleDiscordLogout(response) {
+  response.setHeader("Set-Cookie", clearDiscordCookies());
+  sendJson(response, 200, { ok: true });
+}
+
 async function handleCheckout(request, response) {
   if (request.method !== "POST") {
     sendJson(response, 405, { ok: false, error: "Method not allowed" });
@@ -291,7 +351,17 @@ async function handleUcp(request, response) {
           return;
         }
 
-        const ucp = await createUcp(payload);
+        const adminRequest = isAdminRequest(request);
+        const discordUser = readDiscordSession(request);
+        if (!adminRequest && !discordUser) {
+          sendJson(response, 401, { ok: false, error: "Login Discord dulu untuk membuat UCP." });
+          return;
+        }
+
+        const ucp = await createUcp({
+          ...payload,
+          discordId: adminRequest ? payload.discordId : discordUser.id
+        });
         sendJson(response, 200, { ok: true, ucp });
         return;
     }
@@ -356,6 +426,26 @@ const server = http.createServer(async (request, response) => {
 
   if (request.url.startsWith("/api/admin-logout")) {
     handleAdminLogout(response);
+    return;
+  }
+
+  if (request.url.startsWith("/api/discord-login")) {
+    handleDiscordLogin(request, response);
+    return;
+  }
+
+  if (request.url.startsWith("/api/discord-callback")) {
+    await handleDiscordCallback(request, response);
+    return;
+  }
+
+  if (request.url.startsWith("/api/discord-me")) {
+    handleDiscordMe(request, response);
+    return;
+  }
+
+  if (request.url.startsWith("/api/discord-logout")) {
+    handleDiscordLogout(response);
     return;
   }
 

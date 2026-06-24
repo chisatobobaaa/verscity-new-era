@@ -30,7 +30,7 @@
         <div class="page-hero-inner">
           <p class="eyebrow">User control panel</p>
           <h1>Buat UCP</h1>
-          <p class="page-lead">Daftarkan nama UCP dan Discord ID sebelum masuk kota. Setelah berhasil, kode verifikasi akan muncul dan bisa disalin.</p>
+          <p class="page-lead">Login Discord dulu, lalu daftarkan nama UCP. Discord ID akan diambil otomatis supaya satu orang hanya bisa punya satu UCP.</p>
         </div>
       </section>
 
@@ -39,15 +39,15 @@
           <form class="ucp-form" data-ucp-form>
             <p class="eyebrow">Registrasi UCP</p>
             <h2>Data akun</h2>
+            <div class="discord-login-box" data-discord-box>
+              <p class="muted-text">Login Discord diperlukan untuk membuat UCP.</p>
+              <a class="button button-secondary" href="/api/discord-login" data-discord-login>Login Discord</a>
+            </div>
             <label>
               Nama UCP
               <input type="text" name="ucpName" placeholder="contoh: Mardi_RP" minlength="4" maxlength="22" required>
             </label>
-            <label>
-              Discord ID
-              <input type="text" name="discordId" inputmode="numeric" placeholder="contoh: 123456789012345678" minlength="17" maxlength="20" required>
-            </label>
-            <button class="button button-primary" type="submit">Buat UCP</button>
+            <button class="button button-primary" type="submit" data-create-ucp disabled>Buat UCP</button>
             <p class="ucp-result" data-ucp-result></p>
           </form>
 
@@ -56,9 +56,9 @@
             <h2>Satu orang satu UCP</h2>
             <ul>
               <li>Nama UCP tidak bisa dibuat dua kali.</li>
-              <li>Satu Discord ID hanya bisa membuat satu UCP.</li>
+              <li>Satu akun Discord hanya bisa membuat satu UCP.</li>
               <li>Nama UCP hanya boleh huruf, angka, dan underscore.</li>
-              <li>Discord ID harus angka 17 sampai 20 digit.</li>
+              <li>Discord ID diambil otomatis setelah login Discord.</li>
               <li>Panjang nama mengikuti database server: 4 sampai 22 karakter.</li>
               <li>Simpan kode verifikasi untuk proses masuk/registrasi di server.</li>
             </ul>
@@ -81,6 +81,6 @@
       </div>
     </div>
     <div class="toast" role="status" aria-live="polite" data-toast>UCP berhasil dibuat.</div>
-    <script src="script.js"></script>
+    <script src="script.js?v=20260624-2"></script>
   </body>
 </html>
