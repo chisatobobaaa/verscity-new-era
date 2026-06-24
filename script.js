@@ -349,14 +349,30 @@
   async function saveGlobalSiteData() {
     if (!window.location.protocol.startsWith("http")) return true;
 
+    const staff = await optimizePhotos(getStaffList(), 384);
+    const donationPackages = await optimizePhotos(getDonationPackages(), 800);
+    const vehicleCategoryPhotos = await optimizePhotos(getVehicleCategoryPhotos(), 800);
+
+    siteDataState.staff = staff;
+    siteDataState.donationPackages = donationPackages;
+    siteDataState.vehicleCategoryPhotos = vehicleCategoryPhotos;
+    localStorage.setItem(staffStorageKey, JSON.stringify(staff));
+    localStorage.setItem(donationStorageKey, JSON.stringify(donationPackages));
+    localStorage.setItem(vehicleCategoryPhotoStorageKey, JSON.stringify(vehicleCategoryPhotos));
+
     const payload = {
       data: {
-        staff: getStaffList(),
-        donationPackages: getDonationPackages(),
-        vehicleCategoryPhotos: getVehicleCategoryPhotos(),
+        staff,
+        donationPackages,
+        vehicleCategoryPhotos,
         orders: Array.isArray(siteDataState.orders) ? siteDataState.orders : []
       }
     };
+
+    const payloadSize = new Blob([JSON.stringify(payload)]).size;
+    if (payloadSize > 4 * 1024 * 1024) {
+      throw new Error("Ukuran seluruh foto masih terlalu besar. Hapus beberapa foto lama lalu simpan kembali.");
+    }
 
     const response = await fetch("/api/admin-data", {
       method: "PUT",
@@ -377,7 +393,10 @@
         document.querySelector("[data-vehicle-category-form]")?.classList.add("hidden");
         throw new Error("Sesi admin habis. Login ulang dulu, lalu simpan lagi.");
       }
-      throw new Error(result.error || "Gagal menyimpan data global");
+      if (response.status === 413) {
+        throw new Error("Ukuran foto terlalu besar untuk Vercel. Pilih foto yang lebih kecil.");
+      }
+      throw new Error(result.error || `Gagal menyimpan data global (${response.status})`);
     }
 
     return true;
@@ -1112,8 +1131,7 @@
     });
   }
 
-  async function makeResizedPhoto(file, maxSize = 512) {
-    const source = await readFileAsDataUrl(file);
+  async function resizePhotoSource(source, maxSize = 512, quality = 0.72) {
     const image = new Image();
     await new Promise((resolve, reject) => {
       image.addEventListener("load", resolve, { once: true });
@@ -1127,15 +1145,35 @@
     canvas.height = Math.max(1, Math.round(image.height * scale));
     const context = canvas.getContext("2d");
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.84);
+    return canvas.toDataURL("image/webp", quality);
+  }
+
+  async function makeResizedPhoto(file, maxSize = 512, quality = 0.72) {
+    return resizePhotoSource(await readFileAsDataUrl(file), maxSize, quality);
+  }
+
+  async function optimizePhotos(items, maxSize) {
+    const optimized = [];
+    for (const item of items) {
+      let photo = item.photo || "";
+      if (photo.startsWith("data:image/")) {
+        try {
+          photo = await resizePhotoSource(photo, maxSize, 0.68);
+        } catch (error) {
+          // Keep the original image if an older browser cannot decode it.
+        }
+      }
+      optimized.push({ ...item, photo });
+    }
+    return optimized;
   }
 
   function makeStaffPhoto(file) {
-    return makeResizedPhoto(file, 512);
+    return makeResizedPhoto(file, 384, 0.72);
   }
 
   function makeDonationPhoto(file) {
-    return makeResizedPhoto(file, 1400);
+    return makeResizedPhoto(file, 800, 0.68);
   }
 
   function initStaffAdmin() {
