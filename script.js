@@ -93,8 +93,6 @@
     { id: "bisnis-fastfood", group: "bisnis", tier: "Food", name: "Fast Food", price: "Rp150.000", benefits: ["Menjual pizza, burger, dan fried chicken", "Menjual minuman Sprunk", "Mendukung stock dan restock bisnis"], featured: false, photo: "", photoClass: "" },
     { id: "bisnis-clothes", group: "bisnis", tier: "Fashion", name: "Clothes Store", price: "Rp125.000", benefits: ["Menjual pakaian dan topi atau helm", "Menjual kacamata dan aksesoris", "Menjual tas atau backpack"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-tag", group: "lainnya", tier: "Custom", name: "Custom Tag", price: "Rp20.000", benefits: ["Tag custom sesuai rules", "Warna tag dibahas lewat ticket", "Tidak boleh menyerupai staff"], featured: false, photo: "", photoClass: "" },
-    { id: "lainnya-number", group: "lainnya", tier: "Custom", name: "Custom Number", price: "Rp25.000", benefits: ["Nomor pilihan jika tersedia", "Validasi oleh staff", "Tidak boleh mengandung konten terlarang"], featured: true, photo: "", photoClass: "" },
-    { id: "lainnya-request", group: "lainnya", tier: "Request", name: "Special Request", price: "Ticket", benefits: ["Request item kosmetik", "Request mapping kecil", "Harga dan approval lewat owner"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-plat-6", group: "lainnya", tier: "Plat Kendaraan", name: "Custom Plat 6 Digit", price: "Rp30.000", benefits: ["Custom plat kendaraan maksimal 6 digit", "Nomor harus tersedia", "Wajib mengikuti rules server"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-plat-4", group: "lainnya", tier: "Plat Kendaraan", name: "Custom Plat 4 Digit", price: "Rp40.000", benefits: ["Custom plat kendaraan maksimal 4 digit", "Nomor harus tersedia", "Wajib mengikuti rules server"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-hp-12", group: "lainnya", tier: "Nomor HP", name: "Custom Nomor HP 12 Digit", price: "Rp25.000", benefits: ["Nomor HP custom 12 digit", "Nomor harus tersedia", "Tidak boleh mengandung konten terlarang"], featured: false, photo: "", photoClass: "" },
@@ -212,15 +210,17 @@
 
   function normalizeDonationPackages(list) {
     const legacyBusinessIds = new Set(["bisnis-small", "bisnis-premium", "bisnis-partner"]);
-    const hasLegacyBusinessPackages = list.some((item) => legacyBusinessIds.has(item.id));
+    const retiredPackageIds = new Set(["lainnya-number", "lainnya-request"]);
+    const activeList = list.filter((item) => !retiredPackageIds.has(item.id));
+    const hasLegacyBusinessPackages = activeList.some((item) => legacyBusinessIds.has(item.id));
     let source = hasLegacyBusinessPackages
       ? [
-          ...list.filter((item) => item.group !== "bisnis"),
+          ...activeList.filter((item) => item.group !== "bisnis"),
           ...defaultDonationPackages
             .filter((item) => item.group === "bisnis")
             .map((item) => ({ ...item, benefits: [...item.benefits] }))
         ]
-      : list;
+      : activeList;
 
     const requiredOtherPackages = defaultDonationPackages.filter((item) =>
       item.id.startsWith("lainnya-plat-") ||
