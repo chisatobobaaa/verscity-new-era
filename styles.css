@@ -1579,6 +1579,40 @@ img.staff-avatar {
   resize: vertical;
 }
 
+.discord-login-box {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.discord-user {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.discord-user img,
+.discord-user > span {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--teal), var(--amber));
+  color: #101216;
+  font-weight: 1000;
+}
+
+.discord-user small {
+  display: block;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 .ucp-form input:focus,
 .ucp-form textarea:focus {
   border-color: var(--accent);
@@ -1709,6 +1743,10 @@ img.staff-avatar {
   min-height: 0;
   height: auto;
   aspect-ratio: 16 / 9;
+}
+
+html:not(.site-data-ready) [data-vehicle-category-photo] {
+  visibility: hidden;
 }
 
 .vehicle-preview,

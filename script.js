@@ -277,6 +277,16 @@
     return defaultVehicleCategoryPhotos.map((item) => ({ ...item }));
   }
 
+  function hasCachedVehicleCategoryPhotos() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(vehicleCategoryPhotoStorageKey));
+      return Array.isArray(stored) && stored.length > 0;
+    } catch (error) {
+      localStorage.removeItem(vehicleCategoryPhotoStorageKey);
+      return false;
+    }
+  }
+
   async function saveVehicleCategoryPhotos(categories) {
     siteDataState.vehicleCategoryPhotos = categories;
     localStorage.setItem(vehicleCategoryPhotoStorageKey, JSON.stringify(categories));
@@ -294,12 +304,15 @@
 
       if (Array.isArray(data.staff) && data.staff.length) {
         siteDataState.staff = data.staff;
+        localStorage.setItem(staffStorageKey, JSON.stringify(data.staff));
       }
       if (Array.isArray(data.donationPackages) && data.donationPackages.length) {
         siteDataState.donationPackages = data.donationPackages;
+        localStorage.setItem(donationStorageKey, JSON.stringify(data.donationPackages));
       }
       if (Array.isArray(data.vehicleCategoryPhotos) && data.vehicleCategoryPhotos.length) {
         siteDataState.vehicleCategoryPhotos = data.vehicleCategoryPhotos;
+        localStorage.setItem(vehicleCategoryPhotoStorageKey, JSON.stringify(data.vehicleCategoryPhotos));
       }
       if (Array.isArray(data.orders)) {
         siteDataState.orders = data.orders;
@@ -917,9 +930,56 @@
     const ucpResult = document.querySelector("[data-ucp-result]");
     const ucpModal = document.querySelector("[data-ucp-modal]");
     const ucpCode = document.querySelector("[data-ucp-code]");
+    const discordBox = document.querySelector("[data-discord-box]");
+    const createUcpButton = document.querySelector("[data-create-ucp]");
     const copyUcpCodeButton = document.querySelector("[data-copy-ucp-code]");
     const closeUcpModalButton = document.querySelector("[data-close-ucp-modal]");
     if (!ucpForm) return;
+
+    let discordUser = null;
+
+    async function loadDiscordUser() {
+      const params = new URLSearchParams(window.location.search);
+      const discordError = params.get("discord_error");
+      if (discordError && ucpResult) {
+        ucpResult.textContent = discordError;
+      }
+
+      try {
+        const response = await fetch("/api/discord-me", {
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+        const result = await response.json().catch(() => ({}));
+        discordUser = result.user || null;
+      } catch (error) {
+        discordUser = null;
+      }
+
+      if (discordUser) {
+        if (discordBox) {
+          discordBox.innerHTML = `
+            <div class="discord-user">
+              ${discordUser.avatar ? `<img src="${escapeHtml(discordUser.avatar)}" alt="">` : `<span>DC</span>`}
+              <div>
+                <strong>${escapeHtml(discordUser.globalName || discordUser.username)}</strong>
+                <small>ID: ${escapeHtml(discordUser.id)}</small>
+              </div>
+              <button class="button button-ghost" type="button" data-discord-logout>Logout</button>
+            </div>
+          `;
+        }
+        if (createUcpButton) createUcpButton.disabled = false;
+      } else {
+        if (discordBox) {
+          discordBox.innerHTML = `
+            <p class="muted-text">Login Discord diperlukan untuk membuat UCP.</p>
+            <a class="button button-secondary" href="/api/discord-login" data-discord-login>Login Discord</a>
+          `;
+        }
+        if (createUcpButton) createUcpButton.disabled = true;
+      }
+    }
 
     const closeModal = () => {
       if (ucpModal) ucpModal.hidden = true;
@@ -948,12 +1008,30 @@
       });
     }
 
+    if (discordBox) {
+      discordBox.addEventListener("click", async (event) => {
+        const logoutButton = event.target.closest("[data-discord-logout]");
+        if (!logoutButton) return;
+        await fetch("/api/discord-logout", {
+          method: "POST",
+          credentials: "same-origin"
+        }).catch(() => {});
+        discordUser = null;
+        await loadDiscordUser();
+        showToast("Logout Discord berhasil.");
+      });
+    }
+
     ucpForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!discordUser) {
+        showToast("Login Discord dulu untuk membuat UCP.", 3600);
+        return;
+      }
+
       const submitButton = ucpForm.querySelector("button[type='submit']");
       const payload = {
-        ucpName: ucpForm.elements.ucpName.value,
-        discordId: ucpForm.elements.discordId.value
+        ucpName: ucpForm.elements.ucpName.value
       };
 
       submitButton.disabled = true;
@@ -997,6 +1075,8 @@
         submitButton.textContent = "Buat UCP";
       }
     });
+
+    loadDiscordUser();
   }
 
   function readFileAsDataUrl(file) {
@@ -1614,10 +1694,17 @@
   }
 
   async function initPage() {
+    const hasVehiclePhotoCache = hasCachedVehicleCategoryPhotos();
+    if (hasVehiclePhotoCache) {
+      renderVehicleCategoryPhotos();
+      document.documentElement.classList.add("site-data-ready");
+    }
+
     await loadGlobalSiteData();
     renderStaffList();
     renderDonationPage();
     renderVehicleCategoryPhotos();
+    document.documentElement.classList.add("site-data-ready");
     initCheckoutPage();
     initStaffAdmin();
     initAdminPanelPage();
