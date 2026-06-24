@@ -95,6 +95,17 @@
     { id: "lainnya-tag", group: "lainnya", tier: "Custom", name: "Custom Tag", price: "Rp20.000", benefits: ["Tag custom sesuai rules", "Warna tag dibahas lewat ticket", "Tidak boleh menyerupai staff"], featured: false, photo: "", photoClass: "" },
     { id: "lainnya-number", group: "lainnya", tier: "Custom", name: "Custom Number", price: "Rp25.000", benefits: ["Nomor pilihan jika tersedia", "Validasi oleh staff", "Tidak boleh mengandung konten terlarang"], featured: true, photo: "", photoClass: "" },
     { id: "lainnya-request", group: "lainnya", tier: "Request", name: "Special Request", price: "Ticket", benefits: ["Request item kosmetik", "Request mapping kecil", "Harga dan approval lewat owner"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-plat-6", group: "lainnya", tier: "Plat Kendaraan", name: "Custom Plat 6 Digit", price: "Rp30.000", benefits: ["Custom plat kendaraan maksimal 6 digit", "Nomor harus tersedia", "Wajib mengikuti rules server"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-plat-4", group: "lainnya", tier: "Plat Kendaraan", name: "Custom Plat 4 Digit", price: "Rp40.000", benefits: ["Custom plat kendaraan maksimal 4 digit", "Nomor harus tersedia", "Wajib mengikuti rules server"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-hp-12", group: "lainnya", tier: "Nomor HP", name: "Custom Nomor HP 12 Digit", price: "Rp25.000", benefits: ["Nomor HP custom 12 digit", "Nomor harus tersedia", "Tidak boleh mengandung konten terlarang"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-hp-6", group: "lainnya", tier: "Nomor HP", name: "Custom Nomor HP 6 Digit", price: "Rp35.000", benefits: ["Nomor HP custom 6 digit", "Nomor harus tersedia", "Tidak boleh mengandung konten terlarang"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-hp-5", group: "lainnya", tier: "Nomor HP", name: "Custom Nomor HP 5 Digit", price: "Rp45.000", benefits: ["Nomor HP custom 5 digit", "Nomor harus tersedia", "Tidak boleh mengandung konten terlarang"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-hp-4", group: "lainnya", tier: "Nomor HP", name: "Custom Nomor HP 4 Digit", price: "Rp55.000", benefits: ["Nomor HP custom 4 digit", "Nomor harus tersedia", "Tidak boleh mengandung konten terlarang"], featured: true, photo: "", photoClass: "" },
+    { id: "lainnya-rekening-6", group: "lainnya", tier: "Nomor Rekening", name: "Custom Nomor Rekening 6 Digit", price: "Rp20.000", benefits: ["Nomor rekening custom 6 digit", "Nomor harus tersedia", "Validasi dilakukan oleh staff"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-rekening-5", group: "lainnya", tier: "Nomor Rekening", name: "Custom Nomor Rekening 5 Digit", price: "Rp30.000", benefits: ["Nomor rekening custom 5 digit", "Nomor harus tersedia", "Validasi dilakukan oleh staff"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-rekening-4", group: "lainnya", tier: "Nomor Rekening", name: "Custom Nomor Rekening 4 Digit", price: "Rp40.000", benefits: ["Nomor rekening custom 4 digit", "Nomor harus tersedia", "Validasi dilakukan oleh staff"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-rekening-3", group: "lainnya", tier: "Nomor Rekening", name: "Custom Nomor Rekening 3 Digit", price: "Rp50.000", benefits: ["Nomor rekening custom 3 digit", "Nomor harus tersedia", "Validasi dilakukan oleh staff"], featured: false, photo: "", photoClass: "" },
+    { id: "lainnya-bagasi-100", group: "lainnya", tier: "Bagasi Kendaraan", name: "Custom Bagasi 100 Kg", price: "Rp55.000", benefits: ["Kapasitas bagasi kendaraan menjadi 100 kg", "Berlaku untuk satu kendaraan", "Pemasangan dilakukan oleh staff"], featured: false, photo: "", photoClass: "" },
     { id: "motor-nrg", group: "vehicles-motor", tier: "Sport", name: "NRG-500", price: "Rp40.000", benefits: ["Motor sport cepat", "Warna custom", "Plat custom singkat"], featured: false, photo: "", photoClass: "vehicle-motor-1" },
     { id: "motor-pcj", group: "vehicles-motor", tier: "Street", name: "PCJ-600", price: "Rp35.000", benefits: ["Motor street sport", "Handling normal server", "Warna custom"], featured: true, photo: "", photoClass: "vehicle-motor-2" },
     { id: "motor-faggio", group: "vehicles-motor", tier: "City", name: "Faggio", price: "Rp20.000", benefits: ["Motor santai kota", "Cocok untuk roleplay sipil", "Warna custom"], featured: false, photo: "", photoClass: "vehicle-motor-3" },
@@ -202,7 +213,7 @@
   function normalizeDonationPackages(list) {
     const legacyBusinessIds = new Set(["bisnis-small", "bisnis-premium", "bisnis-partner"]);
     const hasLegacyBusinessPackages = list.some((item) => legacyBusinessIds.has(item.id));
-    const source = hasLegacyBusinessPackages
+    let source = hasLegacyBusinessPackages
       ? [
           ...list.filter((item) => item.group !== "bisnis"),
           ...defaultDonationPackages
@@ -210,6 +221,20 @@
             .map((item) => ({ ...item, benefits: [...item.benefits] }))
         ]
       : list;
+
+    const requiredOtherPackages = defaultDonationPackages.filter((item) =>
+      item.id.startsWith("lainnya-plat-") ||
+      item.id.startsWith("lainnya-hp-") ||
+      item.id.startsWith("lainnya-rekening-") ||
+      item.id.startsWith("lainnya-bagasi-")
+    );
+    const existingIds = new Set(source.map((item) => item.id));
+    source = [
+      ...source,
+      ...requiredOtherPackages
+        .filter((item) => !existingIds.has(item.id))
+        .map((item) => ({ ...item, benefits: [...item.benefits] }))
+    ];
 
     return source.map((item) => {
       const defaultItem = defaultDonationPackages.find((pkg) => pkg.id === item.id) || {};
