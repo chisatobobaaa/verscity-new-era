@@ -222,20 +222,6 @@
         ]
       : activeList;
 
-    const requiredOtherPackages = defaultDonationPackages.filter((item) =>
-      item.id.startsWith("lainnya-plat-") ||
-      item.id.startsWith("lainnya-hp-") ||
-      item.id.startsWith("lainnya-rekening-") ||
-      item.id.startsWith("lainnya-bagasi-")
-    );
-    const existingIds = new Set(source.map((item) => item.id));
-    source = [
-      ...source,
-      ...requiredOtherPackages
-        .filter((item) => !existingIds.has(item.id))
-        .map((item) => ({ ...item, benefits: [...item.benefits] }))
-    ];
-
     return source.map((item) => {
       const defaultItem = defaultDonationPackages.find((pkg) => pkg.id === item.id) || {};
       return {
