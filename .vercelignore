@@ -4,3 +4,5 @@ screenshots/
 .agents/
 .codex/
 start-website.bat
+api/discord-logout.js
+api/q
