@@ -93,8 +93,16 @@ textarea {
 }
 
 .brand-mark.has-photo {
+  border: 0;
   background: transparent;
   box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.brand-mark.has-photo img {
+  border-radius: 0;
+  mix-blend-mode: screen;
 }
 
 .admin-brand-mark {
