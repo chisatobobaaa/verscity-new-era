@@ -1,5 +1,6 @@
 const { createUcp, deleteUcp, listUcps } = require("../lib/ucp");
 const { isAdminRequest } = require("../lib/admin-auth");
+const { readDiscordSession } = require("../lib/discord-auth");
 const { readJsonBody, sendJson } = require("../lib/http-utils");
 
 module.exports = async function handler(request, response) {
@@ -16,7 +17,17 @@ module.exports = async function handler(request, response) {
         return;
       }
 
-      const ucp = await createUcp(payload);
+      const adminRequest = isAdminRequest(request);
+      const discordUser = readDiscordSession(request);
+      if (!adminRequest && !discordUser) {
+        sendJson(response, 401, { ok: false, error: "Login Discord dulu untuk membuat UCP." });
+        return;
+      }
+
+      const ucp = await createUcp({
+        ...payload,
+        discordId: adminRequest ? payload.discordId : discordUser.id
+      });
       sendJson(response, 200, { ok: true, ucp });
       return;
     }
