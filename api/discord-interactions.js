@@ -27,10 +27,26 @@ function readRawBody(request) {
   });
 }
 
-function verifyDiscordRequest(request, body) {
+let cachedDiscordPublicKey = "";
+
+async function getDiscordPublicKey() {
+  if (process.env.DISCORD_PUBLIC_KEY) return process.env.DISCORD_PUBLIC_KEY;
+  if (cachedDiscordPublicKey) return cachedDiscordPublicKey;
+
+  const botToken = process.env.DISCORD_BOT_TOKEN || "";
+  if (!botToken) return "";
+  const response = await fetch("https://discord.com/api/v10/oauth2/applications/@me", {
+    headers: { Authorization: `Bot ${botToken}` }
+  });
+  const application = await response.json().catch(() => ({}));
+  cachedDiscordPublicKey = application.verify_key || "";
+  return cachedDiscordPublicKey;
+}
+
+async function verifyDiscordRequest(request, body) {
   const signature = request.headers["x-signature-ed25519"];
   const timestamp = request.headers["x-signature-timestamp"];
-  const publicKey = process.env.DISCORD_PUBLIC_KEY || "";
+  const publicKey = await getDiscordPublicKey();
   if (!signature || !timestamp || !publicKey) return false;
   const key = crypto.createPublicKey({
     key: Buffer.concat([Buffer.from("302a300506032b6570032100", "hex"), Buffer.from(publicKey, "hex")]),
@@ -43,7 +59,7 @@ function verifyDiscordRequest(request, body) {
 module.exports = async function handler(request, response) {
   try {
     const rawBody = await readRawBody(request);
-    if (!verifyDiscordRequest(request, rawBody)) {
+    if (!(await verifyDiscordRequest(request, rawBody))) {
       response.statusCode = 401;
       response.end("Invalid request signature");
       return;
