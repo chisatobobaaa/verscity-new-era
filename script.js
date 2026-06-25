@@ -86,9 +86,9 @@
   ];
 
   const defaultDonationPackages = [
-    { id: "vip-silver", group: "vip", tier: "VIP Basic", name: "VIP Silver", price: "Rp35.000", benefits: ["Role Discord VIP Silver", "Custom tag basic", "Priority bantuan ticket"], featured: false, photo: "", photoClass: "" },
-    { id: "vip-gold", group: "vip", tier: "Popular", name: "VIP Gold", price: "Rp65.000", benefits: ["Role Discord VIP Gold", "Custom tag premium", "Bonus item kosmetik", "Priority event slot"], featured: true, photo: "", photoClass: "" },
-    { id: "vip-platinum", group: "vip", tier: "VIP Elite", name: "VIP Platinum", price: "Rp100.000", benefits: ["Role Discord VIP Platinum", "Custom tag elite", "Nama masuk list supporter", "Bonus kosmetik eksklusif"], featured: false, photo: "", photoClass: "" },
+    { id: "vip-silver", group: "vip", tier: "VIP Basic", name: "VIP Silver", price: "Rp35.000", benefits: ["VIP level 1 selama 30 hari", "Custom tag basic", "Priority bantuan ticket"], featured: false, photo: "", photoClass: "" },
+    { id: "vip-gold", group: "vip", tier: "Popular", name: "VIP Gold", price: "Rp65.000", benefits: ["VIP level 2 selama 30 hari", "Custom tag premium", "Bonus item kosmetik", "Priority event slot"], featured: true, photo: "", photoClass: "" },
+    { id: "vip-platinum", group: "vip", tier: "VIP Elite", name: "VIP Platinum", price: "Rp100.000", benefits: ["VIP level 3 selama 30 hari", "Custom tag elite", "Nama masuk list supporter", "Bonus kosmetik eksklusif"], featured: false, photo: "", photoClass: "" },
     { id: "apartment-starter", group: "apartments", tier: "Apartment", name: "Starter Room", price: "Rp30.000", benefits: ["Unit apartment basic", "Akses storage standar", "Masa aktif sesuai rules server"], featured: false, photo: "", photoClass: "" },
     { id: "apartment-premium", group: "apartments", tier: "Apartment", name: "Premium Room", price: "Rp60.000", benefits: ["Unit apartment premium", "Interior lebih nyaman", "Akses storage lebih besar"], featured: true, photo: "", photoClass: "" },
     { id: "apartment-suite", group: "apartments", tier: "Apartment", name: "Suite Room", price: "Rp90.000", benefits: ["Unit apartment suite", "Interior pilihan sesuai stock", "Prioritas lokasi jika tersedia"], featured: false, photo: "", photoClass: "" },
@@ -731,6 +731,15 @@
     }[status] || status || "-";
   }
 
+  function fulfillmentStatusLabel(status) {
+    return {
+      fulfilled: "Terkirim otomatis",
+      queued: "Antrean otomatis",
+      failed: "Gagal dikirim",
+      skipped: "Belum diproses"
+    }[status] || "Menunggu pembayaran";
+  }
+
   function renderOrders(orders) {
     const orderList = document.querySelector("[data-order-list]");
     const orderStats = document.querySelector("[data-order-stats]");
@@ -776,8 +785,10 @@
           <div><dt>Gateway</dt><dd>${escapeHtml(paymentGatewayLabel(order.paymentMethod))}</dd></div>
           <div><dt>Metode</dt><dd>${escapeHtml(paymentMethodLabel(order))}</dd></div>
           <div><dt>Status Bayar</dt><dd>${escapeHtml(paymentStatusLabel(order.paymentStatus || order.status))}</dd></div>
+          <div><dt>Pengiriman</dt><dd>${escapeHtml(fulfillmentStatusLabel(order.fulfillmentStatus))}</dd></div>
           <div><dt>Dibuat</dt><dd>${escapeHtml(new Date(order.createdAt).toLocaleString("id-ID"))}</dd></div>
         </dl>
+        ${order.fulfillmentError ? `<p class="order-note">${escapeHtml(order.fulfillmentError)}</p>` : ""}
         ${order.paymentUrl ? `<a class="button button-secondary" href="${escapeHtml(order.paymentUrl)}" target="_blank" rel="noreferrer">Buka Payment</a>` : ""}
         ${order.note ? `<p class="order-note">${escapeHtml(order.note)}</p>` : ""}
       </article>
