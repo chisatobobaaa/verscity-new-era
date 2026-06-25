@@ -11,12 +11,21 @@
   const staffStorageKey = "verscity.staff.list";
   const donationStorageKey = "verscity.donation.packages";
   const vehicleCategoryPhotoStorageKey = "verscity.vehicle.category.photos";
+  const brandStorageKey = "verscity.site.brand";
   const adminSessionKey = "verscity.admin.loggedIn";
   const siteDataState = {
     staff: null,
     donationPackages: null,
     vehicleCategoryPhotos: null,
+    brand: null,
     orders: null
+  };
+
+  const defaultBrand = {
+    name: "Verscity",
+    subtitle: "Roleplay NewEra",
+    initials: "VR",
+    photo: ""
   };
 
   const defaultStaff = [
@@ -328,6 +337,29 @@
     await saveGlobalSiteData();
   }
 
+  function getBrand() {
+    if (siteDataState.brand && typeof siteDataState.brand === "object") {
+      return { ...defaultBrand, ...siteDataState.brand };
+    }
+
+    try {
+      const stored = JSON.parse(localStorage.getItem(brandStorageKey));
+      if (stored && typeof stored === "object") {
+        return { ...defaultBrand, ...stored };
+      }
+    } catch (error) {
+      localStorage.removeItem(brandStorageKey);
+    }
+
+    return { ...defaultBrand };
+  }
+
+  async function saveBrand(brand) {
+    siteDataState.brand = { ...defaultBrand, ...brand };
+    localStorage.setItem(brandStorageKey, JSON.stringify(siteDataState.brand));
+    await saveGlobalSiteData();
+  }
+
   async function loadGlobalSiteData() {
     if (!window.location.protocol.startsWith("http")) return;
 
@@ -349,6 +381,10 @@
         siteDataState.vehicleCategoryPhotos = data.vehicleCategoryPhotos;
         localStorage.setItem(vehicleCategoryPhotoStorageKey, JSON.stringify(data.vehicleCategoryPhotos));
       }
+      if (data.brand && typeof data.brand === "object") {
+        siteDataState.brand = { ...defaultBrand, ...data.brand };
+        localStorage.setItem(brandStorageKey, JSON.stringify(siteDataState.brand));
+      }
       if (Array.isArray(data.orders)) {
         siteDataState.orders = data.orders;
       }
@@ -363,19 +399,23 @@
     const staff = await optimizePhotos(getStaffList(), 384);
     const donationPackages = await optimizePhotos(getDonationPackages(), 800);
     const vehicleCategoryPhotos = await optimizePhotos(getVehicleCategoryPhotos(), 800);
+    const [brand] = await optimizePhotos([getBrand()], 384);
 
     siteDataState.staff = staff;
     siteDataState.donationPackages = donationPackages;
     siteDataState.vehicleCategoryPhotos = vehicleCategoryPhotos;
+    siteDataState.brand = brand;
     localStorage.setItem(staffStorageKey, JSON.stringify(staff));
     localStorage.setItem(donationStorageKey, JSON.stringify(donationPackages));
     localStorage.setItem(vehicleCategoryPhotoStorageKey, JSON.stringify(vehicleCategoryPhotos));
+    localStorage.setItem(brandStorageKey, JSON.stringify(brand));
 
     const payload = {
       data: {
         staff,
         donationPackages,
         vehicleCategoryPhotos,
+        brand,
         orders: Array.isArray(siteDataState.orders) ? siteDataState.orders : []
       }
     };
@@ -402,6 +442,7 @@
         document.querySelector("[data-staff-form]")?.classList.add("hidden");
         document.querySelector("[data-donation-form]")?.classList.add("hidden");
         document.querySelector("[data-vehicle-category-form]")?.classList.add("hidden");
+        document.querySelector("[data-brand-form]")?.classList.add("hidden");
         throw new Error("Sesi admin habis. Login ulang dulu, lalu simpan lagi.");
       }
       if (response.status === 413) {
@@ -426,6 +467,24 @@
     document.querySelectorAll("[data-vehicle-category-photo]").forEach((element) => {
       const category = categoryPhotos.find((item) => item.id === element.dataset.vehicleCategoryPhoto);
       applyVehicleCategoryPhoto(element, category);
+    });
+  }
+
+  function renderBrand() {
+    const brand = getBrand();
+    document.querySelectorAll(".brand").forEach((element) => {
+      const mark = element.querySelector(".brand-mark");
+      const name = element.querySelector("strong");
+      const subtitle = element.querySelector("small");
+
+      if (mark) {
+        mark.innerHTML = brand.photo
+          ? `<img src="${escapeHtml(brand.photo)}" alt="${escapeHtml(brand.name)}">`
+          : escapeHtml(brand.initials || makeInitials(brand.name));
+      }
+      if (name) name.textContent = brand.name;
+      if (subtitle) subtitle.textContent = brand.subtitle;
+      element.setAttribute("aria-label", `${brand.name} Home`);
     });
   }
 
@@ -1195,6 +1254,7 @@
     const donationSelect = document.querySelector("[data-donation-select]");
     const vehicleCategoryForm = document.querySelector("[data-vehicle-category-form]");
     const vehicleCategorySelect = document.querySelector("[data-vehicle-category-select]");
+    const brandForm = document.querySelector("[data-brand-form]");
     if (!loginForm || !staffForm || !staffSelect) return;
 
     const previewName = document.querySelector("[data-admin-preview-name]");
@@ -1214,12 +1274,18 @@
     const vehicleCategoryPreviewName = document.querySelector("[data-vehicle-category-preview-name]");
     const removeVehicleCategoryPhotoButton = document.querySelector("[data-remove-vehicle-category-photo]");
     const resetVehicleCategoryPhotoButton = document.querySelector("[data-reset-vehicle-category-photo]");
+    const brandPreview = document.querySelector("[data-brand-preview]");
+    const brandPreviewName = document.querySelector("[data-brand-preview-name]");
+    const brandPreviewSubtitle = document.querySelector("[data-brand-preview-subtitle]");
+    const removeBrandPhotoButton = document.querySelector("[data-remove-brand-photo]");
     let staffList = getStaffList();
     let donationPackages = getDonationPackages();
     let vehicleCategoryPhotos = getVehicleCategoryPhotos();
+    let brand = getBrand();
     let activePhoto = "";
     let activeDonationPhoto = "";
     let activeVehicleCategoryPhoto = "";
+    let activeBrandPhoto = "";
 
     function setPanelState() {
       const loggedIn = sessionStorage.getItem(adminSessionKey) === "true";
@@ -1227,6 +1293,7 @@
       staffForm.classList.toggle("hidden", !loggedIn);
       if (donationForm) donationForm.classList.toggle("hidden", !loggedIn);
       if (vehicleCategoryForm) vehicleCategoryForm.classList.toggle("hidden", !loggedIn);
+      if (brandForm) brandForm.classList.toggle("hidden", !loggedIn);
     }
 
     function fillStaffOptions() {
@@ -1344,6 +1411,27 @@
       updateVehicleCategoryPreview(category);
     }
 
+    function updateBrandPreview(nextBrand) {
+      if (brandPreview) {
+        brandPreview.innerHTML = nextBrand.photo
+          ? `<img src="${escapeHtml(nextBrand.photo)}" alt="${escapeHtml(nextBrand.name)}">`
+          : escapeHtml(nextBrand.initials || makeInitials(nextBrand.name));
+      }
+      if (brandPreviewName) brandPreviewName.textContent = nextBrand.name;
+      if (brandPreviewSubtitle) brandPreviewSubtitle.textContent = nextBrand.subtitle;
+    }
+
+    function fillBrandForm() {
+      if (!brandForm) return;
+      brand = getBrand();
+      brandForm.elements.name.value = brand.name;
+      brandForm.elements.subtitle.value = brand.subtitle;
+      brandForm.elements.initials.value = brand.initials || makeInitials(brand.name);
+      brandForm.elements.photo.value = "";
+      activeBrandPhoto = brand.photo || "";
+      updateBrandPreview(brand);
+    }
+
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const username = loginForm.elements.username.value.trim();
@@ -1379,6 +1467,7 @@
         fillDonationForm();
         fillVehicleCategoryOptions();
         fillVehicleCategoryForm();
+        fillBrandForm();
         showToast("Login berhasil.");
       } catch (error) {
         showToast("Login admin gagal tersambung ke backend.", 3600);
@@ -1388,6 +1477,61 @@
     staffSelect.addEventListener("change", fillStaffForm);
     if (donationSelect) donationSelect.addEventListener("change", fillDonationForm);
     if (vehicleCategorySelect) vehicleCategorySelect.addEventListener("change", fillVehicleCategoryForm);
+
+    if (brandForm) {
+      brandForm.elements.photo.addEventListener("change", async () => {
+        const file = brandForm.elements.photo.files[0];
+        if (!file) return;
+        activeBrandPhoto = await makeStaffPhoto(file);
+        updateBrandPreview({
+          name: brandForm.elements.name.value,
+          subtitle: brandForm.elements.subtitle.value,
+          initials: brandForm.elements.initials.value,
+          photo: activeBrandPhoto
+        });
+      });
+
+      ["name", "subtitle", "initials"].forEach((fieldName) => {
+        brandForm.elements[fieldName].addEventListener("input", () => {
+          updateBrandPreview({
+            name: brandForm.elements.name.value,
+            subtitle: brandForm.elements.subtitle.value,
+            initials: brandForm.elements.initials.value,
+            photo: activeBrandPhoto
+          });
+        });
+      });
+
+      removeBrandPhotoButton?.addEventListener("click", () => {
+        activeBrandPhoto = "";
+        brandForm.elements.photo.value = "";
+        updateBrandPreview({
+          name: brandForm.elements.name.value,
+          subtitle: brandForm.elements.subtitle.value,
+          initials: brandForm.elements.initials.value,
+          photo: ""
+        });
+      });
+
+      brandForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        brand = {
+          name: brandForm.elements.name.value.trim(),
+          subtitle: brandForm.elements.subtitle.value.trim(),
+          initials: brandForm.elements.initials.value.trim().slice(0, 3).toUpperCase(),
+          photo: activeBrandPhoto
+        };
+
+        try {
+          await saveBrand(brand);
+          fillBrandForm();
+          renderBrand();
+          showToast("Brand website berhasil disimpan global.");
+        } catch (error) {
+          showToast(error.message, 3600);
+        }
+      });
+    }
 
     staffForm.elements.photo.addEventListener("change", async () => {
       const file = staffForm.elements.photo.files[0];
@@ -1693,11 +1837,13 @@
     fillStaffOptions();
     fillDonationOptions();
     fillVehicleCategoryOptions();
+    fillBrandForm();
     setPanelState();
     if (sessionStorage.getItem(adminSessionKey) === "true") {
       fillStaffForm();
       fillDonationForm();
       fillVehicleCategoryForm();
+      fillBrandForm();
     }
   }
 
@@ -1767,6 +1913,7 @@
   }
 
   async function initPage() {
+    renderBrand();
     const hasVehiclePhotoCache = hasCachedVehicleCategoryPhotos();
     if (hasVehiclePhotoCache) {
       renderVehicleCategoryPhotos();
@@ -1780,6 +1927,7 @@
     }
 
     await loadGlobalSiteData();
+    renderBrand();
     renderStaffList();
     renderDonationPage();
     document.documentElement.classList.add("donation-data-ready");

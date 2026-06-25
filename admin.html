@@ -212,12 +212,51 @@
               <button class="button button-secondary" type="button" data-reset-vehicle-category-photo>Reset Foto Vehicles</button>
             </div>
           </form>
+
+          <form class="admin-card hidden" data-brand-form>
+            <div class="admin-head">
+              <div>
+                <p class="eyebrow">Edit website</p>
+                <h2>Brand website</h2>
+              </div>
+              <a class="button button-ghost" href="index.html">Lihat Website</a>
+            </div>
+
+            <div class="admin-preview">
+              <div class="brand-mark admin-brand-mark" data-brand-preview>VR</div>
+              <div>
+                <h3 data-brand-preview-name>Verscity</h3>
+                <p data-brand-preview-subtitle>Roleplay NewEra</p>
+              </div>
+            </div>
+
+            <label>
+              Foto/logo
+              <input type="file" name="photo" accept="image/*">
+            </label>
+            <button class="button button-ghost" type="button" data-remove-brand-photo>Hapus Foto Logo</button>
+
+            <label>
+              Nama website
+              <input type="text" name="name" maxlength="40" required>
+            </label>
+            <label>
+              Teks kecil
+              <input type="text" name="subtitle" maxlength="60" required>
+            </label>
+            <label>
+              Inisial logo
+              <input type="text" name="initials" maxlength="3" required>
+            </label>
+
+            <button class="button button-primary" type="submit">Simpan Brand</button>
+          </form>
         </div>
       </section>
     </main>
 
     <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
     <div class="toast" role="status" aria-live="polite" data-toast>Data staff tersimpan.</div>
-    <script src="script.js?v=20260624-2"></script>
+    <script src="script.js?v=20260625-4"></script>
   </body>
 </html>
