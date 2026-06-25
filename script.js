@@ -1197,7 +1197,7 @@
       discordBox.addEventListener("click", async (event) => {
         const logoutButton = event.target.closest("[data-discord-logout]");
         if (!logoutButton) return;
-        await fetch("/api/discord-logout", {
+        await fetch("/api/discord-me", {
           method: "POST",
           credentials: "same-origin"
         }).catch(() => {});
