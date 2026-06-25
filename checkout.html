@@ -54,13 +54,15 @@
               WhatsApp aktif
               <input type="text" name="whatsapp" inputmode="tel" placeholder="08xxxxxxxxxx" required>
             </label>
-            <label>
-              Discord
-              <input type="text" name="discord" placeholder="username#0000 / username">
-            </label>
+            <div class="discord-login-box" data-checkout-discord></div>
             <label>
               Nama karakter IC
               <input type="text" name="characterName" required>
+            </label>
+            <label data-reward-target-field hidden>
+              <span data-reward-target-label>Detail hadiah</span>
+              <input type="text" name="rewardTarget">
+              <small class="muted-text" data-reward-target-help></small>
             </label>
             <label>
               Catatan
@@ -81,6 +83,6 @@
 
     <footer class="site-footer"><p>Verscity Roleplay | NewEra</p><p>Hostname: Verscity Roleplay | NewEra</p></footer>
     <div class="toast" role="status" aria-live="polite" data-toast>Order tersimpan.</div>
-    <script src="script.js?v=20260624-2"></script>
+    <script src="script.js?v=20260625-7"></script>
   </body>
 </html>

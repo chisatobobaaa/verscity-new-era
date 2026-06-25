@@ -616,6 +616,10 @@
     const checkoutForm = document.querySelector("[data-checkout-form]");
     const checkoutSummary = document.querySelector("[data-checkout-summary]");
     const checkoutResult = document.querySelector("[data-checkout-result]");
+    const checkoutDiscord = document.querySelector("[data-checkout-discord]");
+    const rewardTargetField = document.querySelector("[data-reward-target-field]");
+    const rewardTargetLabel = document.querySelector("[data-reward-target-label]");
+    const rewardTargetHelp = document.querySelector("[data-reward-target-help]");
     if (!checkoutForm || !checkoutSummary) return;
 
     const pkg = findCheckoutPackage();
@@ -633,8 +637,64 @@
       <ul>${renderBenefitList(pkg.benefits)}</ul>
     `;
 
+    const packageName = String(pkg.name || "").toLowerCase();
+    let targetConfig = null;
+    if (packageName.includes("custom nama ic")) {
+      targetConfig = { label: "Nama IC baru", help: "Contoh: Mardi_Newera" };
+    } else if (pkg.id === "lainnya-tag" || packageName.includes("custom tag")) {
+      targetConfig = { label: "Tag yang diinginkan", help: "Tuliskan tag tanpa kode warna." };
+    } else if (packageName.includes("nomor hp")) {
+      targetConfig = { label: "Nomor HP yang diinginkan", help: "Isi angka sesuai jumlah digit paket." };
+    } else if (packageName.includes("nomor rekening")) {
+      targetConfig = { label: "Nomor rekening yang diinginkan", help: "Isi angka sesuai jumlah digit paket." };
+    } else if (packageName.includes("custom plat")) {
+      targetConfig = { label: "ID kendaraan dan plat", help: "Format: ID kendaraan | PLAT. Contoh: 2199 | B 1234 VR" };
+    } else if (packageName.includes("bagasi")) {
+      targetConfig = { label: "ID kendaraan", help: "Masukkan ID kendaraan milik karakter." };
+    }
+
+    if (targetConfig && rewardTargetField) {
+      rewardTargetField.hidden = false;
+      checkoutForm.elements.rewardTarget.required = true;
+      if (rewardTargetLabel) rewardTargetLabel.textContent = targetConfig.label;
+      if (rewardTargetHelp) rewardTargetHelp.textContent = targetConfig.help;
+    }
+
+    let discordUser = null;
+    async function loadCheckoutDiscord() {
+      try {
+        const response = await fetch("/api/discord-me", { credentials: "same-origin", cache: "no-store" });
+        const result = await response.json();
+        discordUser = result.user || null;
+      } catch (error) {
+        discordUser = null;
+      }
+
+      const submitButton = checkoutForm.querySelector("button[type='submit']");
+      if (discordUser) {
+        checkoutDiscord.innerHTML = `
+          <div class="discord-user">
+            ${discordUser.avatar ? `<img src="${escapeHtml(discordUser.avatar)}" alt="">` : `<span>DC</span>`}
+            <div><strong>${escapeHtml(discordUser.globalName || discordUser.username)}</strong><small>ID: ${escapeHtml(discordUser.id)}</small></div>
+          </div>`;
+        submitButton.disabled = false;
+      } else {
+        const returnTo = `${window.location.pathname}${window.location.search}`;
+        checkoutDiscord.innerHTML = `
+          <p class="muted-text">Login Discord wajib agar hadiah atau ticket privat dikirim ke akun yang benar.</p>
+          <a class="button button-secondary" href="/api/discord-login?return=${encodeURIComponent(returnTo)}">Login Discord</a>`;
+        submitButton.disabled = true;
+      }
+    }
+
+    loadCheckoutDiscord();
+
     checkoutForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!discordUser) {
+        showToast("Login Discord dulu sebelum checkout.", 3600);
+        return;
+      }
       const submitButton = checkoutForm.querySelector("button[type='submit']");
       const payload = {
         packageId: checkoutForm.elements.packageId.value,
@@ -644,8 +704,8 @@
         price: pkg.price,
         buyerName: checkoutForm.elements.buyerName.value,
         whatsapp: checkoutForm.elements.whatsapp.value,
-        discord: checkoutForm.elements.discord.value,
         characterName: checkoutForm.elements.characterName.value,
+        rewardTarget: checkoutForm.elements.rewardTarget.value,
         note: checkoutForm.elements.note.value
       };
 
