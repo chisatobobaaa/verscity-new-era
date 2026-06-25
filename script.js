@@ -478,6 +478,7 @@
       const subtitle = element.querySelector("small");
 
       if (mark) {
+        mark.classList.toggle("has-photo", Boolean(brand.photo));
         mark.innerHTML = brand.photo
           ? `<img src="${escapeHtml(brand.photo)}" alt="${escapeHtml(brand.name)}">`
           : escapeHtml(brand.initials || makeInitials(brand.name));
