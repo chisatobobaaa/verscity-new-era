@@ -662,6 +662,12 @@
 
     let discordUser = null;
     async function loadCheckoutDiscord() {
+      const discordError = new URLSearchParams(window.location.search).get("discord_error");
+      if (discordError) {
+        if (checkoutResult) checkoutResult.textContent = discordError;
+        showToast(discordError, 4200);
+      }
+
       try {
         const response = await fetch("/api/discord-me", { credentials: "same-origin", cache: "no-store" });
         const result = await response.json();
@@ -676,6 +682,7 @@
           <div class="discord-user">
             ${discordUser.avatar ? `<img src="${escapeHtml(discordUser.avatar)}" alt="">` : `<span>DC</span>`}
             <div><strong>${escapeHtml(discordUser.globalName || discordUser.username)}</strong><small>ID: ${escapeHtml(discordUser.id)}</small></div>
+            <button class="button button-ghost" type="button" data-checkout-discord-change>Ganti Discord</button>
           </div>`;
         submitButton.disabled = false;
       } else {
@@ -686,6 +693,21 @@
         submitButton.disabled = true;
       }
     }
+
+    checkoutDiscord?.addEventListener("click", async (event) => {
+      const changeButton = event.target.closest("[data-checkout-discord-change]");
+      if (!changeButton) return;
+
+      changeButton.disabled = true;
+      changeButton.textContent = "Keluar...";
+      await fetch("/api/discord-me", {
+        method: "POST",
+        credentials: "same-origin"
+      }).catch(() => {});
+
+      const returnTo = `${window.location.pathname}${window.location.search}`;
+      window.location.href = `/api/discord-login?return=${encodeURIComponent(returnTo)}`;
+    });
 
     loadCheckoutDiscord();
 
